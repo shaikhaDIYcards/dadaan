@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>دَدَن</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap">
+<style>
+/* What is on this page is locked. The key is the part of the link after the # sign, which a browser never sends to
+   any server: the page reads it, unlocks the files next to it, and draws the page. Without the whole link there is
+   nothing to read here. */
+html{color-scheme:light}
+body{margin:0;background:#F6F8FB;color:#10253D;font-family:'IBM Plex Sans Arabic',system-ui,-apple-system,'Segoe UI',Tahoma,sans-serif}
+#lock{min-height:100vh;min-height:100svh;display:grid;place-content:center;justify-items:center;gap:10px;text-align:center;padding:24px}
+#lock img{height:72px;width:auto}
+#lock h1{font:800 28px/1.4 'Baloo Bhaijaan 2',system-ui,sans-serif;margin:8px 0 0}
+#lock p{margin:0;color:#5D7088;font-size:18px;line-height:1.7;max-width:22em}
+</style>
+</head>
+<body>
+<main id="lock"><img src="../a/logo.webp" alt="دَدَن" width="1022" height="634"><h1>صفحة خاصة</h1><p id="msg">افتحوها من الرابط الكامل اللي وصلكم.</p></main>
+<script>
+(function () {
+  var msg = document.getElementById('msg'), h = location.hash.slice(1);
+  if (!h) return;
+  if (!(window.crypto && crypto.subtle)) { msg.textContent = 'هذا المتصفح قديم وما يقدر يفتح الصفحة. جربوا كروم أو سفاري.'; return; }
+  msg.textContent = 'لحظة...';
+  var keyP;
+  try {
+    var bin = atob(h.replace(/-/g, '+').replace(/_/g, '/')), raw = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) raw[i] = bin.charCodeAt(i);
+    keyP = crypto.subtle.digest('SHA-256', raw).then(function (d) { return crypto.subtle.importKey('raw', d, 'AES-GCM', false, ['decrypt']); });
+  } catch (e) { msg.textContent = 'الرابط ناقص. اطلبوه مرة ثانية كامل.'; return; }
+  function open(name) {
+    return Promise.all([keyP, fetch(name).then(function (r) { if (!r.ok) throw new Error('missing'); return r.arrayBuffer(); })]).then(function (x) {
+      var b = new Uint8Array(x[1]);
+      return crypto.subtle.decrypt({ name: 'AES-GCM', iv: b.subarray(0, 12) }, x[0], b.subarray(12));
+    });
+  }
+  var cache = {};
+  window.__vault = { url: function (name, type) { return cache[name] || (cache[name] = open(name).then(function (buf) { return URL.createObjectURL(new Blob([buf], { type: type })); })); } };
+  open('app.bin').then(function (buf) {
+    var app = JSON.parse(new TextDecoder().decode(buf)), st = document.createElement('style');
+    document.title = app.title; st.textContent = app.css; document.head.appendChild(st);
+    document.body.innerHTML = app.html;
+    (new Function(app.js))();
+  }, function () { msg.textContent = 'الرابط ناقص أو غلط. اطلبوه مرة ثانية كامل.'; });
+})();
+</script>
+</body>
+</html>

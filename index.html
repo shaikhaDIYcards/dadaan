@@ -5,9 +5,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@500;600;700;800&family=Noto+Naskh+Arabic:wght@700&display=swap">
 <style>
-/* Layout: a sticky top bar; home = the journey map as a panning band with the heroes, then three doors
-   (play, our story, contact). Each door opens its own view by the address hash. Light only, by choice:
-   the owner wants bright pages, and the game itself is drawn on a sky-and-meadow palette. */
+/* Layout: home = the game's garden on one screen (the heroes, three living letters, a speech bubble and three
+   choices: contact, our story, play). Each choice opens its own view by the address hash; the inner views have a
+   top bar, the home does not. Light only, by choice: the owner wants bright pages, and the game is drawn that way. */
 :root {
   color-scheme: light;
   --sky: #EAF7F9;
@@ -44,6 +44,7 @@ button { font: inherit; cursor: pointer; }
 :focus-visible { outline: 3px solid var(--sun); outline-offset: 3px; border-radius: 10px; }
 [dir="ltr"] { unicode-bidi: isolate; }
 
+
 /* ---------- top bar ---------- */
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--paper); }
 .bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 9; background: rgba(255,255,255,.92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
@@ -54,60 +55,16 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .bar nav a { text-decoration: none; font-weight: 700; padding: 6px 14px; border-radius: 999px; color: var(--muted); }
 .bar nav a[aria-current="page"] { background: var(--teal-l); color: var(--teal-d); }
 .bar nav a.cta { background: var(--orange-btn); color: #fff; box-shadow: 0 4px 0 var(--orange-d); }
+body:not(.inner) .bar { display: none; }            /* the home is the garden itself: no bar over it */
+body:not(.inner)::before { background: #A3E2F4; }
+::selection { background: var(--sun); color: var(--ink); }
 
-/* ---------- home: the journey band ---------- */
-.journey { position: relative; overflow: hidden; background: url(a/map-strip.webp) 30% 100% / auto 100% no-repeat var(--sky); animation: pan 90s ease-in-out infinite alternate; }
-/* pans across the middle of the journey map only: the castle end of the map has a rainbow, which دَدَن keeps out */
-@keyframes pan { to { background-position: 90% 100%; } }
-.journey::after { content: ""; position: absolute; inset: 0; background: linear-gradient(270deg, rgba(234,247,249,.94) 0 46%, rgba(234,247,249,.55) 70%, rgba(234,247,249,0)); pointer-events: none; }
-.journey .wrap { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); align-items: end; gap: 12px; padding-block: 40px 0; min-height: 420px; }
-.pitch { display: grid; gap: 16px; align-self: center; padding-bottom: 36px; }
-.pitch .try { display: inline-flex; align-items: center; gap: 8px; justify-self: start; background: var(--paper); color: var(--grass-d); font-weight: 800; padding: 8px 16px 8px 12px; border-radius: 999px; box-shadow: 0 4px 0 var(--grass-l); }
-.pitch .try svg { width: 26px; height: 26px; fill: var(--grass-d); background: var(--grass-l); border-radius: 50%; padding: 4px; }
-.pitch .kicker { font-weight: 700; color: var(--teal); }
-.pitch h1 { font-size: clamp(34px, 5.4vw, 58px); }
-.pitch h1 em { font-style: normal; color: var(--orange); }
-.pitch p { font-size: clamp(17px, 2vw, 20px); color: var(--muted); max-width: 32em; }
 .btns { display: flex; flex-wrap: wrap; gap: 10px; }
 .btn { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 800; font-size: 18px; padding: 12px 22px; border-radius: 999px; border: 0; transition: transform .15s var(--spring); }
 .btn:active { transform: translateY(3px); }
 .btn.go { background: var(--orange-btn); color: #fff; box-shadow: 0 6px 0 var(--orange-d); }
 .btn.go:active { box-shadow: 0 3px 0 var(--orange-d); }
 .btn.soft { background: var(--paper); color: var(--teal-d); box-shadow: 0 6px 0 var(--line); }
-.tiles { display: flex; gap: 8px; }
-.tile { width: 52px; height: 58px; display: grid; place-items: center; background: var(--paper); border-radius: 14px; box-shadow: 0 5px 0 var(--line); font: 700 30px/1 var(--naskh); color: var(--teal-d); padding-top: 4px; }
-.tile:nth-child(2) { color: var(--orange); } .tile:nth-child(3) { color: var(--grass); } .tile:nth-child(4) { color: var(--teal); } .tile:nth-child(5) { color: var(--orange-d); }
-.heroes { position: relative; height: 340px; }
-.heroes img { position: absolute; bottom: -6px; height: 300px; width: auto; animation: bob 2.6s ease-in-out infinite; transform-origin: 50% 100%; }
-.heroes .t { inset-inline-start: 4%; }
-.heroes .n { inset-inline-start: 40%; height: 270px; animation-delay: -1.3s; }
-@keyframes bob { 50% { transform: translateY(-8px) rotate(-1.5deg); } }
-
-.facts { background: var(--paper); border-block: 1px solid var(--line); }
-.facts .wrap { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding-block: 14px; gap: 10px; text-align: center; }
-.facts b { display: block; font-size: 30px; color: var(--teal-d); line-height: 1.1; font-variant-numeric: tabular-nums; }
-.facts span { color: var(--muted); font-size: 15px; }
-
-/* ---------- the three doors ---------- */
-.doors .wrap { padding-block: 40px 56px; display: grid; gap: 18px; }
-.doors h2 { font-size: clamp(26px, 3.6vw, 34px); }
-.door-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
-.door { --c: var(--teal); --cd: var(--teal-d); --cl: var(--teal-l); display: grid; grid-template-rows: auto 1fr auto; background: var(--paper); border-radius: var(--r); overflow: hidden; text-decoration: none; box-shadow: 0 8px 0 var(--cl), 0 18px 30px rgba(17,128,143,.10); transition: transform .2s var(--spring); }
-.door:hover { transform: translateY(-4px) rotate(-.6deg); }
-.door.story { --c: var(--orange-btn); --cd: var(--orange-d); --cl: var(--orange-l); }
-.door.contact { --c: var(--grass); --cd: var(--grass-d); --cl: var(--grass-l); }
-.door .pic { aspect-ratio: 16 / 10; background: var(--cl); display: grid; place-items: center; overflow: hidden; position: relative; }
-.door .pic img.shot { width: 86%; border-radius: 14px; border: 6px solid #fff; box-shadow: 0 10px 20px rgba(34,51,63,.15); transform: rotate(-2deg); }
-.door .pic .faces { display: flex; }
-.door .pic .faces span { width: 76px; height: 76px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 30px; color: #fff; border: 5px solid #fff; margin-inline-start: -14px; box-shadow: 0 6px 12px rgba(34,51,63,.12); }
-.door .pic .faces span:nth-child(1) { background: var(--teal); } .door .pic .faces span:nth-child(2) { background: var(--grass); } .door .pic .faces span:nth-child(3) { background: var(--orange); }
-.door .pic .phone { height: 80%; aspect-ratio: 9 / 13; background: #fff; border-radius: 22px; box-shadow: 0 10px 20px rgba(34,51,63,.15); display: grid; align-content: center; justify-items: center; gap: 10px; padding: 10px; transform: rotate(3deg); }
-.door .pic .phone i { display: block; width: 72%; height: 14px; border-radius: 99px; background: var(--grass-l); }
-.door .pic .phone i:first-child { width: 42px; height: 42px; background: var(--grass); }
-.door .txt { padding: 16px 20px 6px; display: grid; gap: 4px; align-content: start; }
-.door h3 { font-size: 26px; color: var(--cd); }
-.door p { color: var(--muted); }
-.door .more { margin: 10px 20px 20px; justify-self: start; background: var(--c); color: #fff; font-weight: 800; padding: 8px 18px; border-radius: 999px; box-shadow: 0 4px 0 var(--cd); }
 
 /* ---------- inner views ---------- */
 .view .wrap { padding-block: 32px 64px; display: grid; gap: 28px; }
@@ -176,70 +133,179 @@ table.cmp { width: 100%; border-collapse: separate; border-spacing: 0; min-width
 .btn.copy { background: var(--grass-l); color: var(--grass-d); box-shadow: 0 5px 0 #CFE3A2; }
 
 footer { border-top: 1px solid var(--line); background: var(--paper); }
-body.on-home footer { display: none; }
+body:not(.inner) footer { display: none; }
 footer .wrap { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; padding-block: 18px; color: var(--muted); font-size: 15px; }
 footer img { height: 36px; width: auto; }
 
-/* load moment: the five letters drop into their tiles one by one */
-@media (prefers-reduced-motion: no-preference) {
-  .tile { animation: drop .8s var(--spring) both; }
-  .tile:nth-child(2) { animation-delay: .12s; } .tile:nth-child(3) { animation-delay: .24s; } .tile:nth-child(4) { animation-delay: .36s; } .tile:nth-child(5) { animation-delay: .48s; }
-  @keyframes drop { from { transform: translateY(-46px) rotate(-14deg) scale(.6); } 70% { transform: translateY(4px) scale(1.06, .94); } }
+/* ---------- home: the game's own garden, one screen, no scrolling ----------
+   The sky, the horizon line and the lawn are drawn here in the picture's colours, and the garden picture
+   (house, slide, swings) sits on that horizon at the left, so the scene fits any screen shape.
+   --hz is where the horizon is, --bw how wide the garden picture is drawn, --cast how tall Tamim stands. */
+.view-home {
+  position: relative; isolation: isolate; overflow: hidden;
+  height: 100vh; height: 100svh; min-height: 500px;
+  background: #A3E2F4;
+  --lawn: #A5CC59;
+  --brand: clamp(36px, 6svh, 54px);
+  --cast: min(24svh, 46vw, 250px);
+  --top: calc(env(safe-area-inset-top, 0px) + 26px);
+  --hz: calc(var(--top) + var(--cast) * .76);
+  --bw: min(calc((var(--hz) - env(safe-area-inset-top, 0px) - 12px - var(--brand)) / .262), 220vw);
+  --ln: max(2px, calc(var(--bw) * .0019));
+}
+.scene { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+.scene .sky { position: absolute; left: 0; right: 0; top: calc(var(--hz) - var(--bw) * .30814); height: calc(var(--bw) * .30814);
+  background: linear-gradient(#A3E2F4 0, #A3E2F4 25%, #AAE5F5 34.6%, #B2E9F4 44%, #BDECF3 53.5%, #C9F1F6 63%, #CFF4F5 72.3%, #D1F9F4 81.8%, #D6F8F8 91%, #D8F6F8 100%); }
+.scene .lawn { position: absolute; left: 0; right: 0; top: var(--hz); bottom: 0;
+  background: linear-gradient(#0A1206 0, #0A1206 var(--ln), #C9E77A var(--ln), #C4E470 calc(var(--ln) * 2.8), var(--lawn) calc(var(--ln) * 3.3), var(--lawn) 100%); }
+.scene .garden { position: absolute; right: 0; top: calc(var(--hz) - var(--bw) * .30814); width: var(--bw); max-width: none; height: auto; transform: scaleX(-1);   /* on a phone the house stands at the right, under the logo */
+  -webkit-mask-image: linear-gradient(to right, #000 93%, transparent); mask-image: linear-gradient(to right, #000 93%, transparent); }
+.scene .beds { position: absolute; left: 0; bottom: 0; width: calc(var(--bw) * .7994); max-width: none; height: auto; display: none; }
+.scene .cloud { position: absolute; left: 7vw; top: 5svh; width: clamp(110px, 13vw, 190px); height: auto; display: none; }
+.scene .c2 { left: 36vw; top: 14svh; width: clamp(80px, 9vw, 140px); }
+
+.yard { position: relative; height: 100%; max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; padding-top: var(--top); padding-bottom: clamp(8px, 1.6svh, 18px); }
+.brand { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 8px); inset-inline-start: max(16px, env(safe-area-inset-right, 0px)); display: block; line-height: 0; }
+.brand img { height: var(--brand); width: auto; }
+
+/* the cast: two heroes and three letters, standing on the lawn */
+.cast { flex: none; height: var(--cast); display: flex; direction: ltr; align-items: flex-end; justify-content: space-between; gap: calc(var(--cast) * .05); }
+.kids { display: flex; align-items: flex-end; }
+.k, .lt { position: relative; display: block; flex: none; line-height: 0; }
+.k img, .lt img { display: block; height: 100%; width: auto; max-width: none; }
+.k.t { height: var(--cast); z-index: 2; }
+.k.n { height: calc(var(--cast) * .9); margin-left: calc(var(--cast) * -.07); }
+.k::after, .lt::after { content: ""; position: absolute; left: 6%; right: 6%; bottom: -2.5%; height: 8%; border-radius: 50%; background: rgba(48, 88, 10, .3); z-index: -1; }
+.letters { display: flex; align-items: flex-end; gap: calc(var(--cast) * .035); }
+.lt { border: 0; padding: 0; background: none; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.lt.alif { height: calc(var(--cast) * .6); }
+.lt.ba { height: calc(var(--cast) * .38); }
+.lt.ta { height: calc(var(--cast) * .27); }
+.lt.alif::after { left: -30%; right: -30%; }
+.lt .pop { position: absolute; left: 50%; bottom: calc(100% + 6px); translate: -50% 0; white-space: nowrap; line-height: 1.5;
+  background: #fff; color: var(--ink); border: 2px solid var(--ink); border-radius: 999px; padding: 0 10px; font: 800 clamp(13px, 2svh, 16px)/1.6 var(--display);
+  opacity: 0; scale: .5; transform-origin: 50% 100%; transition: opacity .16s ease-out, scale .28s var(--spring); pointer-events: none; }
+.lt.on .pop { opacity: 1; scale: 1; }
+.lt.alif .pop { left: auto; right: -6px; translate: 0 0; transform-origin: 85% 100%; }
+
+/* what the heroes say: the headline, in their speech bubble */
+.cast, .pane { width: 100%; max-width: 620px; margin-inline: auto; }
+.pane { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; justify-content: flex-start; gap: clamp(6px, 1.2svh, 11px); margin-top: clamp(13px, 2.4svh, 22px); }
+.say { position: relative; background: #fff; border: 3px solid var(--ink); border-radius: 26px; padding: clamp(10px, 1.9svh, 18px) clamp(16px, 4vw, 26px) clamp(12px, 2.1svh, 20px); display: grid; gap: clamp(3px, .8svh, 8px); }
+.say::after { content: ""; position: absolute; top: -12.5px; left: 54px; width: 20px; height: 20px; background: #fff; border: 3px solid var(--ink); border-right: 0; border-bottom: 0; border-top-left-radius: 5px; transform: rotate(45deg) skew(8deg, 8deg); }
+.say .try { display: flex; align-items: center; gap: 7px; color: var(--grass-d); font-weight: 800; font-size: clamp(12.5px, min(1.95svh, 3.5vw), 16px); line-height: 1.35; text-wrap: balance; }
+.say .try svg { flex: none; width: 1.35em; height: 1.35em; fill: #fff; background: var(--grass); border-radius: 50%; padding: .2em; }
+.say h1 { font-size: clamp(25px, min(6.5svh, 8.6vw), 58px); line-height: 1.16; letter-spacing: -.01em; }
+.say .sub { color: #3F515E; font-size: clamp(14px, 2.15svh, 18px); line-height: 1.5; max-width: 34em; }
+
+/* the three choices, drawn like the game's own buttons: white pills with the picture's dark outline */
+.choices { display: grid; gap: clamp(6px, 1.2svh, 11px); }
+.choice { --c: var(--grass); position: relative; display: flex; align-items: center; gap: clamp(10px, 1.6svh, 14px); text-decoration: none; color: var(--ink);
+  background: #fff; border: 3px solid var(--ink); border-radius: 999px; padding: clamp(5px, 1svh, 9px); padding-inline-end: 18px;
+  transition: transform .14s cubic-bezier(.2, .8, .2, 1), background-color .15s; }
+.choice .ic { width: clamp(38px, 6.1svh, 52px); aspect-ratio: 1; border-radius: 50%; background: var(--c); display: grid; place-items: center; flex: none; }
+.choice .ic svg { width: 54%; height: 54%; fill: #fff; }
+.choice .t { display: grid; line-height: 1.25; min-width: 0; }
+.choice b { font-size: clamp(17px, 2.75svh, 22px); font-weight: 800; }
+.choice small { color: #4D5F6C; font-size: clamp(12.5px, 1.85svh, 15px); font-weight: 600; }
+.choice .tag, .soon2 .tag { background: var(--sun); color: var(--ink); border: 2px solid var(--ink); border-radius: 999px; font-weight: 800; font-size: 13px; line-height: 1.5; padding: 0 10px; }
+.choice .tag { display: inline-block; vertical-align: .12em; margin-inline-start: 6px; }
+.choice.story { --c: var(--teal); }
+.choice.play { background: #CC4A1C; color: #fff; }
+.choice.play small { color: #fff; }
+.choice.play .ic { background: #fff; }
+.choice.play .ic svg { fill: #CC4A1C; translate: -4% 0; }
+@media (hover: hover) { .choice:hover { transform: translateY(-2px); } .choice:not(.play):hover { background: var(--sun-l); } }
+.choice:active { transform: translateY(2px) scale(.985); }
+.view-home :focus-visible { outline: 3px solid #fff; outline-offset: 2px; box-shadow: 0 0 0 8px var(--ink); border-radius: 999px; }
+.view-home .lt:focus-visible { border-radius: 14px; }
+
+.soon2 { display: flex; align-items: center; justify-content: center; gap: 9px; border: 2.5px dashed var(--ink); border-radius: 999px; padding: clamp(3px, .8svh, 7px) 14px; color: var(--ink); font-weight: 800; font-size: clamp(14px, 2.2svh, 17px); line-height: 1.5; }
+.soon2 svg { width: 1.3em; height: 1.3em; flex: none; fill: none; stroke: var(--ink); stroke-width: 2.2; stroke-linejoin: round; stroke-linecap: round; }
+
+@media (max-height: 590px) and (max-width: 860px) and (orientation: portrait) { .say .sub { display: none; } }
+@media (min-height: 780px) and (orientation: portrait) { .scene .beds { display: block; width: min(calc(var(--bw) * .7994), 150vw); } }
+
+/* wide screens: the cast on the lawn at the left, the bubble and the choices at the right */
+@media (min-width: 861px), (orientation: landscape) and (min-width: 600px) {
+  .view-home {
+    min-height: 380px;
+    --cw: min(540px, 44vw);
+    --cast: min(47svh, calc((min(1240px, 100vw - 32px) - var(--cw) - 3vw) * .5), 440px);
+    --feet: clamp(12px, 9svh, 84px);
+    --hz: calc(100svh - var(--feet) - var(--cast) * .7);
+    --bw: min(calc((var(--hz) - 64px) / .262), 72vw);
+  }
+  .scene .garden { right: auto; left: 0; transform: none; }
+  .scene .beds, .scene .cloud { display: block; }
+  .lt.alif .pop { left: 50%; right: auto; translate: -50% 0; transform-origin: 50% 100%; }
+  .cast, .pane { max-width: none; margin-inline: 0; }
+  .yard { display: grid; grid-template-columns: var(--cw) minmax(0, 1fr); column-gap: 3vw; padding-top: 0; padding-bottom: 0; }
+  .pane { grid-column: 1; grid-row: 1; }
+  .cast { grid-column: 2; grid-row: 1; align-self: end; justify-content: flex-end; margin-bottom: var(--feet); }
+  .kids { order: 2; }
+  .k.t { order: 2; }
+  .k.n { margin-left: 0; margin-right: calc(var(--cast) * -.07); }
+  .pane { align-self: center; justify-content: center; margin: 0; gap: clamp(7px, 1.5svh, 14px); padding-block: clamp(8px, 2svh, 20px); }
+  .brand { position: static; align-self: flex-start; }
+  .view-home { --brand: clamp(40px, 9.5svh, 86px); }
+  .say { border-radius: 30px; }
+  .say::after { top: auto; bottom: 30px; left: -12.5px; border: 3px solid var(--ink); border-top: 0; border-right: 0; border-top-left-radius: 0; border-bottom-left-radius: 5px; }
+}
+@media (orientation: landscape) and (max-height: 440px) {
+  .view-home { min-height: 330px; }
+  .pane { gap: 6px; padding-block: 6px; }
+  .say .sub { display: none; }
+  .view-home { --brand: 32px; }
+  .brand { position: absolute; top: 8px; left: 16px; inset-inline-start: auto; }   /* a short screen: the logo moves into the sky */
 }
 
-/* ---------- home: one screen, one card ---------- */
-.view-home .journey { height: calc(100svh - 61px - env(safe-area-inset-top, 0px)); min-height: 520px; display: grid; }
-.view-home .journey .wrap { width: 100%; min-height: 0; padding-block: clamp(16px, 4vh, 40px) 0; align-items: center; }
-.home-card { position: relative; z-index: 2; align-self: center; display: grid; gap: clamp(10px, 1.8vh, 16px); background: var(--paper); border-radius: 30px; padding: clamp(20px, 3.4vh, 34px) clamp(20px, 3vw, 34px); box-shadow: 0 10px 0 var(--line), 0 24px 50px rgba(34,51,63,.10); max-width: 560px; margin-bottom: clamp(16px, 4vh, 40px); }
-.home-card .try { display: inline-flex; align-items: center; gap: 8px; justify-self: start; background: var(--grass-l); color: var(--grass-d); font-weight: 800; padding: 6px 16px 6px 8px; border-radius: 999px; font-size: clamp(14px, 1.9vh, 16px); }
-.home-card .try svg { width: 26px; height: 26px; fill: #fff; background: var(--grass); border-radius: 50%; padding: 5px; flex: none; }
-.home-card h1 { font-size: clamp(30px, 5.2vh, 50px); }
-.home-card h1 em { font-style: normal; color: var(--orange); }
-.home-card .sub { color: var(--muted); font-size: clamp(15px, 2.1vh, 18px); }
-.choices { display: grid; gap: clamp(8px, 1.4vh, 12px); margin-top: 4px; }
-.choice { --c: var(--grass); --cd: var(--grass-d); --cl: var(--grass-l); position: relative; display: flex; align-items: center; gap: 14px; text-decoration: none; background: var(--cl); border-radius: 20px; padding: clamp(10px, 1.6vh, 14px) 16px; box-shadow: 0 5px 0 color-mix(in srgb, var(--c) 35%, transparent); transition: transform .15s var(--spring); }
-.choice:hover { transform: translateY(-2px); }
-.choice:active { transform: translateY(3px); box-shadow: 0 2px 0 color-mix(in srgb, var(--c) 35%, transparent); }
-.choice .ic { width: clamp(42px, 6vh, 52px); height: clamp(42px, 6vh, 52px); border-radius: 50%; background: var(--c); display: grid; place-items: center; flex: none; box-shadow: 0 4px 0 var(--cd); }
-.choice .ic svg { width: 55%; height: 55%; fill: #fff; }
-.choice .t { display: grid; line-height: 1.3; }
-.choice b { font-size: clamp(18px, 2.7vh, 22px); color: var(--cd); }
-.choice small { color: var(--muted); font-size: clamp(13px, 1.8vh, 15px); font-weight: 600; }
-.choice .tag { margin-inline-start: auto; background: var(--paper); color: var(--cd); font-weight: 800; font-size: 13px; padding: 2px 10px; border-radius: 999px; }
-.choice.story { --c: var(--teal); --cd: var(--teal-d); --cl: var(--teal-l); }
-.choice.play { --c: var(--orange-btn); --cd: var(--orange-d); --cl: var(--orange-l); }
-.choice.play b { color: var(--orange-d); }
-.view-home .heroes { align-self: end; height: clamp(220px, 46vh, 360px); }
-.view-home .heroes img { height: 88%; }
-.view-home .heroes .n { height: 80%; }
-@media (max-width: 860px) {
-  .view-home .journey { height: auto; min-height: calc(100svh - 53px - env(safe-area-inset-top, 0px)); }
-  .view-home .journey .wrap { padding-block: 14px; align-items: start; }
-  .home-card { max-width: none; margin-bottom: 0; }
-  .view-home .heroes { position: absolute; z-index: 3; top: -6px; inset-inline-end: 6px; width: 120px; height: 104px; pointer-events: none; }
-  .view-home .heroes img { height: 100px; bottom: auto; top: 0; }
-  .view-home .heroes .t { inset-inline-start: auto; inset-inline-end: 36px; }
-  .view-home .heroes .n { height: 90px; inset-inline-start: auto; inset-inline-end: 0; top: 8px; }
-  .home-card { padding-top: 22px; }
+/* motion: the letters hop onto the lawn one after another, then everyone idles */
+@media (prefers-reduced-motion: no-preference) {
+  .lt { animation: hop-in .75s cubic-bezier(.3, 1.4, .5, 1) both; }
+  .lt.alif { animation-delay: .25s; } .lt.ba { animation-delay: .42s; } .lt.ta { animation-delay: .59s; }
+  @keyframes hop-in { 0% { transform: translateY(-135%) rotate(-14deg) scale(.7); opacity: 0; } 30% { opacity: 1; } 72% { transform: translateY(0) scale(1.12, .86); } 100% { transform: none; } }
+  .k img { animation: bob 2.8s ease-in-out infinite; transform-origin: 50% 100%; }
+  .k.n img { animation-delay: -1.4s; }
+  @keyframes bob { 50% { transform: translateY(-1.6%) rotate(-1.2deg); } }
+  .lt img { animation: breathe 2.4s ease-in-out infinite; transform-origin: 50% 100%; }
+  .lt.ba img { animation-duration: 2.9s; } .lt.ta img { animation-duration: 2.1s; }
+  @keyframes breathe { 50% { transform: scale(1.03, .965); } }
+  .lt.go img { animation: jump .62s cubic-bezier(.3, 1.5, .5, 1); }
+  .lt.ba.go img { animation: waddle .7s ease-in-out; }
+  .lt.ta.go img { animation: wobble .66s ease-in-out; }
+  @keyframes jump { 0% { transform: none; } 35% { transform: translateY(-34%) scale(.96, 1.06); } 70% { transform: translateY(0) scale(1.1, .9); } 100% { transform: none; } }
+  @keyframes waddle { 0%, 100% { transform: none; } 20% { transform: rotate(-9deg) translateX(-6%); } 50% { transform: rotate(8deg) translateX(6%); } 80% { transform: rotate(-5deg); } }
+  @keyframes wobble { 0%, 100% { transform: none; } 25% { transform: translateY(-22%) rotate(-7deg); } 55% { transform: translateY(0) scale(1.12, .88); } 80% { transform: rotate(5deg); } }
+  .say { animation: say-in .5s cubic-bezier(.2, .9, .3, 1.2) .1s both; transform-origin: 12% 0; }
+  @keyframes say-in { from { transform: scale(.92); opacity: 0; } }
+  .choice.play .ic { animation: beat 2.2s ease-in-out 1.6s infinite; }
+  @keyframes beat { 0%, 60%, 100% { scale: 1; } 30% { scale: 1.12; } }
+  .scene .cloud { left: 0; animation: drift 150s linear -40s infinite; }
+  .scene .c2 { animation-duration: 210s; animation-delay: -120s; }
+  @keyframes drift { from { transform: translateX(-22vw); } to { transform: translateX(104vw); } }
 }
-@media (prefers-reduced-motion: reduce) {
-  .journey, .heroes img { animation: none; }
+@media (prefers-reduced-motion: no-preference) and (min-width: 861px), (prefers-reduced-motion: no-preference) and (orientation: landscape) and (min-width: 600px) {
+  .say { transform-origin: 0 80%; }
 }
+
+/* "tell me at launch": a small form in the play view (the real site only; elsewhere the WhatsApp button stays) */
+.tell { display: grid; gap: 10px; background: var(--sun-l); border-radius: 20px; padding: 16px 18px; max-width: 420px; }
+.tell b { font-size: 20px; }
+.tell label { display: grid; gap: 4px; font-weight: 700; font-size: 15px; color: var(--muted); }
+.tell input { font: inherit; font-weight: 600; color: var(--ink); padding: 10px 14px; border-radius: 14px; border: 2px solid var(--line); background: #fff; min-width: 0; width: 100%; }
+.tell input:focus-visible { outline: 3px solid var(--teal); outline-offset: 1px; border-radius: 14px; }
+.tell .btn { justify-self: start; }
+.tell .src.bad { color: #A3261B; font-weight: 700; }
+.tell-done { background: var(--grass-l); color: var(--grass-d); font-weight: 800; border-radius: 16px; padding: 12px 16px; max-width: 420px; }
+
 @media (max-width: 860px) {
-  .journey .wrap { grid-template-columns: 1fr; min-height: 0; padding-top: 28px; }
-  .journey::after { background: linear-gradient(180deg, rgba(234,247,249,.94) 0 55%, rgba(234,247,249,.5)); }
-  .pitch { padding-bottom: 0; }
-  .heroes { height: 220px; }
-  .heroes img { height: 200px; }
-  .heroes .n { height: 180px; }
-  .door-grid, .shots, .why, .stats, .people, .story-grid, .play-main { grid-template-columns: 1fr; }
+  .shots, .why, .stats, .people, .story-grid, .play-main { grid-template-columns: 1fr; }
 }
 @media (max-width: 520px) {
   .bar .home img { height: 36px; }
   .bar nav a { padding: 5px 10px; font-size: 15px; }
-  .bar nav a:not(.cta) { display: none; }   /* on a phone the home card holds all three choices; the bar keeps the logo and the game */
-  .facts b { font-size: 24px; }
-  .tile { width: 44px; height: 50px; font-size: 26px; }
+  .bar nav a:not(.cta) { display: none; }   /* on a phone the bar keeps the logo and the game; the home holds all three choices */
 }
 </style>
 
@@ -255,24 +321,41 @@ footer img { height: 36px; width: auto; }
 </header>
 
 <main>
-  <!-- HOME: one screen, one card, three choices (no scrolling) -->
+  <!-- HOME: the game's garden on one screen: the heroes say what دَدَن is, three clear choices, no scrolling -->
   <section id="v-home" class="view-home">
-    <div class="journey gut">
-      <div class="wrap">
-        <div class="home-card">
-          <span class="try"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10-6.5z"/></svg>تقدر تجرّب اللعبة من هذي الصفحة، مجاناً وبدون تنزيل</span>
-          <h1>يتعلّم طفلك الحروف <em>وهو يلعب</em></h1>
+    <div class="scene" aria-hidden="true">
+      <div class="sky"></div>
+      <div class="lawn"></div>
+      <img class="garden" src="a/garden.webp" alt="" width="2064" height="664">
+      <img class="beds" src="a/beds.webp" alt="" width="2064" height="152">
+      <svg class="cloud c1" viewBox="0 0 200 92"><path fill="#fff" d="M38 84a28 28 0 0 1-3-55.8A40 40 0 0 1 108 16a31 31 0 0 1 52 18 25.500 25.500 0 0 1 2 50z"/><path fill="#D9F1F9" d="M38 84a28 28 0 0 1-21-10c20 5 44-3 62 1s38 5 52 0 28-4 39 0a25 25 0 0 1-8 9z"/></svg>
+      <svg class="cloud c2" viewBox="0 0 200 92"><path fill="#fff" d="M38 84a28 28 0 0 1-3-55.8A40 40 0 0 1 108 16a31 31 0 0 1 52 18 25.500 25.500 0 0 1 2 50z"/><path fill="#D9F1F9" d="M38 84a28 28 0 0 1-21-10c20 5 44-3 62 1s38 5 52 0 28-4 39 0a25 25 0 0 1-8 9z"/></svg>
+    </div>
+    <div class="yard gut">
+      <div class="cast">
+        <div class="kids" aria-hidden="true">
+          <span class="k t"><img src="a/k-tamim.webp" alt="" width="271" height="416"></span>
+          <span class="k n"><img src="a/k-noura.webp" alt="" width="158" height="404"></span>
+        </div>
+        <div class="letters">
+          <button class="lt ta" type="button" data-w="تَمْر" aria-label="حرف التاء، مثل تمر"><img src="a/l-ta.webp" alt="" width="461" height="340"><span class="pop" aria-hidden="true"></span></button>
+          <button class="lt ba" type="button" data-w="بَطّة" aria-label="حرف الباء، مثل بطة"><img src="a/l-ba.webp" alt="" width="457" height="460"><span class="pop" aria-hidden="true"></span></button>
+          <button class="lt alif" type="button" data-w="أَسَد" aria-label="حرف الألف، مثل أسد"><img src="a/l-alif.webp" alt="" width="128" height="640"><span class="pop" aria-hidden="true">اضغطني</span></button>
+        </div>
+      </div>
+      <div class="pane">
+        <a class="brand" href="#" aria-label="دَدَن"><img src="a/logo.webp" alt="دَدَن" width="1022" height="634"></a>
+        <div class="say">
+          <p class="try"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10-6.500z"/></svg>تقدر تجرّب اللعبة من هذي الصفحة، مجاناً وبدون تنزيل</p>
+          <h1>يتعلّم طفلك الحروف وهو يلعب</h1>
           <p class="sub">لعبة عربية للأطفال من ٣ إلى ٧ سنوات: لكل حرف أغنية وألعاب، والأم أو الأب يسمع ويصحّح.</p>
-          <nav class="choices" aria-label="اختر">
+        </div>
+        <nav class="choices" aria-label="اختر">
             <a class="choice contact" href="#contact"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.3 15.3 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.6a1 1 0 0 1-.25 1z"/></svg></span><span class="t"><b>تواصل مع فريقنا</b><small>للأهالي والمدارس والشركاء</small></span></a>
-            <a class="choice story" href="#story"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v16H6.5A2.5 2.5 0 0 0 4 20.5zM6.5 18H18V4H6.5a.5.5 0 0 0-.5.5v13.55c.16-.03.33-.05.5-.05zM4 20.5A2.5 2.5 0 0 0 6.5 23H20v-2H6.5a.5.5 0 0 1 0-1H20v-1H6.5A2.5 2.5 0 0 0 4 20.5zM9 7h7v2H9z"/></svg></span><span class="t"><b>القصة وراء دَدَن</b><small>والبحوث والدراسات التي بنيناه عليها</small></span><span class="tag">بحوث</span></a>
+            <a class="choice story" href="#story"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v16H6.5A2.5 2.5 0 0 0 4 20.5zM6.5 18H18V4H6.5a.5.5 0 0 0-.5.5v13.55c.16-.03.33-.05.5-.05zM4 20.5A2.5 2.5 0 0 0 6.5 23H20v-2H6.5a.5.5 0 0 1 0-1H20v-1H6.5A2.5 2.5 0 0 0 4 20.5zM9 7h7v2H9z"/></svg></span><span class="t"><b>القصة وراء دَدَن <span class="tag">بحوث</span></b><small>والبحوث والدراسات التي بنيناه عليها</small></span></a>
             <a class="choice play" href="#play"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10-6.5z"/></svg></span><span class="t"><b>جرّب اللعبة</b><small>مجاناً، بدون تنزيل</small></span></a>
-          </nav>
-        </div>
-        <div class="heroes" aria-hidden="true">
-          <img class="t" src="a/tamim.webp" alt="">
-          <img class="n" src="a/noura.webp" alt="">
-        </div>
+        </nav>
+        <p class="soon2"><span class="tag">قريباً</span>فيديوهات قصص<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.500" y="5" width="19" height="14" rx="3.500"/><path d="M10 9.200v5.600l4.800-2.800z"/></svg></p>
       </div>
     </div>
   </section>
@@ -287,7 +370,14 @@ footer img { height: 36px; width: auto; }
           <span class="soon">نسخة تجريبية</span>
           <h3>يشتغل على الآيباد والتلفون</h3>
           <p class="lead">يسمع الطفل الحرف، ويقوله بصوته، والأم أو الأب يقول له: صح، أو أعد.</p>
-          <div class="btns"><a class="btn go" href="play/">ادخل اللعبة</a><a class="btn wa" href="https://wa.me/97466737375?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C%20%D8%A3%D8%B1%D9%8A%D8%AF%20%D8%A3%D9%86%20%D8%AA%D8%AE%D8%A8%D8%B1%D9%88%D9%86%D9%8A%20%D8%A3%D9%88%D9%84%20%D9%85%D8%A7%20%D9%8A%D9%86%D8%B7%D9%84%D9%82%20%D8%AA%D8%B7%D8%A8%D9%8A%D9%82%20%D8%AF%D9%8E%D8%AF%D9%8E%D9%86." target="_blank" rel="noopener">خبّروني عند الإطلاق</a></div>
+          <div class="btns"><a class="btn go" data-hit="game" href="play/">ادخل اللعبة</a><a class="btn wa" id="tellWa" href="https://wa.me/97466737375?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C%20%D8%A3%D8%B1%D9%8A%D8%AF%20%D8%A3%D9%86%20%D8%AA%D8%AE%D8%A8%D8%B1%D9%88%D9%86%D9%8A%20%D8%A3%D9%88%D9%84%20%D9%85%D8%A7%20%D9%8A%D9%86%D8%B7%D9%84%D9%82%20%D8%AA%D8%B7%D8%A8%D9%8A%D9%82%20%D8%AF%D9%8E%D8%AF%D9%8E%D9%86." target="_blank" rel="noopener">خبّروني عند الإطلاق</a></div>
+          <form class="tell" id="tell" hidden novalidate>
+            <b>خبّروني عند الإطلاق</b>
+            <label>الاسم<input name="name" autocomplete="name" maxlength="80" required></label>
+            <label>رقم الواتساب<input name="phone" type="tel" inputmode="tel" dir="ltr" autocomplete="tel" maxlength="20" value="+974 " required></label>
+            <button class="btn go" type="submit">سجّلني</button>
+            <p class="src" id="tellMsg" role="status">نستخدم الرقم لنخبرك عند إطلاق دَدَن فقط.</p>
+          </form>
           <p class="src">تفتح اللعبة في صفحة جديدة. الأفضل أن تمسك الجهاز بالعرض.</p>
         </div>
       </div>
@@ -360,7 +450,7 @@ footer img { height: 36px; width: auto; }
         <div class="panel">
           <h3>كل رقم، ومن أين جاء</h3>
           <p class="lead">جمعنا كل الأرقام في صفحة واحدة: من أجرى الدراسة، وأين، وعلى كم شخص، وما الذي لا تثبته.</p>
-          <div class="btns"><a class="btn go" href="research/">افتح صفحة الدراسات</a></div>
+          <div class="btns"><a class="btn go" data-hit="research" href="research/">افتح صفحة الدراسات</a></div>
           <p class="src">لم نُجرِ دراسة بأنفسنا. قرأنا أبحاثاً منشورة وبنينا عليها.</p>
         </div>
         <div class="panel tested">
@@ -426,11 +516,26 @@ footer img { height: 36px; width: auto; }
 <script>
 (function () {
   var views = ['home', 'play', 'story', 'contact'];
+
+  /* On the real site only: count how many times each part is opened (a plain +1, no names, nothing about a child and
+     nothing from inside the game) and take "tell me at launch" sign-ups. The key below is the public one. */
+  var LIVE = /(^|\.)dadaan-ar\.com$/.test(location.hostname) || location.hostname === 'localhost';
+  var API = 'https://wonjydmwlaqpzanczizj.supabase.co/rest/v1/rpc/', KEY = 'sb_publishable_oVp-E7FX9CFzAdwWJbmz-Q_wqzaeN-T', counted = {};
+  function rpc(fn, body) { return fetch(API + fn, { method: 'POST', keepalive: true, headers: { apikey: KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); }
+  function hit(what) {
+    if (!LIVE || counted[what]) return;
+    counted[what] = 1;
+    var first = false;
+    try { if (!localStorage.getItem('dd-' + what)) { localStorage.setItem('dd-' + what, '1'); first = true; } } catch (e) {}
+    try { rpc('hit', { p_what: what, p_first: first }).catch(function () {}); } catch (e) {}
+  }
+
   function show() {
     var h = (location.hash || '').replace('#', '');
     if (views.indexOf(h) < 0) h = 'home';
+    hit(h);
     views.forEach(function (v) { document.getElementById('v-' + v).hidden = v !== h; });
-    document.body.classList.toggle('on-home', h === 'home');   /* the home is one screen: no footer under it */
+    document.body.classList.toggle('inner', h !== 'home');   /* the home is one screen: no bar over it, no footer under it */
     document.querySelectorAll('.bar nav a').forEach(function (a) {
       if (a.dataset.v === h) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
     });
@@ -438,6 +543,43 @@ footer img { height: 36px; width: auto; }
   }
   window.addEventListener('hashchange', show);
   show();
+
+  /* the three letters on the lawn: tap one, it moves the way its word moves and shows the word */
+  var letters = document.querySelectorAll('.lt'), first = document.querySelector('.lt.alif'), tapped = false;
+  setTimeout(function () { if (!tapped) first.classList.add('on'); }, 1500);   /* the alif says «اضغطني» until someone does */
+  letters.forEach(function (b) {
+    var pop = b.querySelector('.pop'), timer;
+    b.addEventListener('click', function () {
+      tapped = true;
+      letters.forEach(function (o) { if (o !== b) o.classList.remove('on', 'go'); });
+      pop.textContent = b.dataset.w;
+      b.classList.remove('go'); void b.offsetWidth; b.classList.add('go', 'on');
+      clearTimeout(timer); timer = setTimeout(function () { b.classList.remove('on', 'go'); }, 2000);
+    });
+  });
+
+  document.querySelectorAll('[data-hit]').forEach(function (a) { a.addEventListener('click', function () { hit(a.dataset.hit); }); });
+
+  /* "tell me at launch": on the real site the WhatsApp button opens a two-line form instead */
+  var wa = document.getElementById('tellWa'), form = document.getElementById('tell'), note = document.getElementById('tellMsg');
+  if (LIVE && wa && form) {
+    wa.addEventListener('click', function (ev) { ev.preventDefault(); wa.hidden = true; form.hidden = false; form.elements.name.focus(); });
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var name = form.elements.name.value.trim(), phone = form.elements.phone.value, btn = form.querySelector('button');
+      var say = function (text, bad) { note.textContent = text; note.className = 'src' + (bad ? ' bad' : ''); };
+      if (!name) { say('اكتب الاسم.', true); form.elements.name.focus(); return; }
+      if (phone.replace(/\D/g, '').length < 10) { say('اكتب الرقم كاملاً مع مفتاح الدولة، مثل \u2066+974\u00a05555\u00a05555\u2069.', true); form.elements.phone.focus(); return; }
+      btn.disabled = true; say('لحظة...');
+      rpc('signup', { p_name: name, p_phone: phone, p_source: 'site' }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (res) {
+        btn.disabled = false;
+        if (res === 'ok') { var done = document.createElement('p'); done.className = 'tell-done'; done.setAttribute('role', 'status'); done.textContent = 'تم التسجيل. نخبرك أول ما تنطلق دَدَن.'; form.replaceWith(done); }
+        else if (res === 'bad_phone') { say('الرقم غير واضح. اكتبه مع مفتاح الدولة، مثل \u2066+974\u00a05555\u00a05555\u2069.', true); form.elements.phone.focus(); }
+        else if (res === 'bad_name') { say('اكتب الاسم.', true); form.elements.name.focus(); }
+        else throw new Error(res);
+      }).catch(function () { btn.disabled = false; wa.hidden = false; say('لم نستطع التسجيل الآن. جرّب بعد دقيقة، أو راسلنا على الواتساب.', true); });
+    });
+  }
 
   document.querySelectorAll('.copy').forEach(function (b) {
     b.addEventListener('click', function () {

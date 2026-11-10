@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>دَدَن</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap">
+<style>
+/* The numbers page for the Dadan team. It holds no data itself: it asks the database for the report with the key
+   carried after the # in its link, and the database answers only to that key. Layout: four tiles for today, the
+   days as a table, then the people who asked to be told at launch. Light only, by the owner's choice. */
+:root{color-scheme:light;--bg:#F6F8FB;--card:#FFFFFF;--navy:#10253D;--ink2:#5D7088;--line:#DCE4EE;
+--teal:#0E9A96;--teal-t:#E5F8F5;--pink:#D94F75;--pink-t:#FDECF1;--purple:#7A58C4;--purple-t:#F0EAFB;--yellow:#9A6A00;--yellow-t:#FFF0C4;--orange:#CC4A1C;
+--display:'Baloo Bhaijaan 2','IBM Plex Sans Arabic',system-ui,sans-serif;--font:'IBM Plex Sans Arabic',system-ui,-apple-system,'Segoe UI',Tahoma,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--navy);font-family:var(--font);font-size:17px;line-height:1.7;padding:0 max(16px,env(safe-area-inset-left,0px)) 56px max(16px,env(safe-area-inset-right,0px))}
+[hidden]{display:none!important}
+button{font:inherit;cursor:pointer;color:inherit}
+:focus-visible{outline:3px solid var(--purple);outline-offset:2px;border-radius:8px}
+h1,h2{font-family:var(--display);font-weight:800;margin:0;line-height:1.4}
+#lock{min-height:100vh;min-height:100svh;display:grid;place-content:center;justify-items:center;gap:10px;text-align:center}
+#lock img{height:72px;width:auto}
+#lock h1{font-size:28px;margin-top:8px}
+#lock p{margin:0;color:var(--ink2);font-size:18px;max-width:22em}
+.wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+.pane{display:flex;flex-direction:column;gap:14px;min-width:0}
+.hdr{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;padding-block:14px 12px;border-bottom:1px solid var(--line)}
+.hdr .name{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-size:22px}
+.hdr .name img{height:38px;width:auto}
+.hdr .sp{flex:1}
+.hdr small{color:var(--ink2);font-size:14px}
+.btn{font-family:var(--display);font-weight:700;font-size:16px;min-height:42px;padding:0 18px;border-radius:21px;border:1.5px solid var(--line);background:var(--card);display:inline-flex;align-items:center;justify-content:center;text-decoration:none;color:inherit}
+.btn.go{background:var(--orange);border-color:var(--orange);color:#fff}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:14px}
+.tile{border-radius:20px;padding:16px 20px;background:var(--t);--c:var(--teal);--t:var(--teal-t);display:grid;gap:2px}
+.tile.pink{--c:var(--pink);--t:var(--pink-t)}.tile.purple{--c:var(--purple);--t:var(--purple-t)}.tile.yellow{--c:var(--yellow);--t:var(--yellow-t)}
+.tile b{font-family:var(--display);font-weight:800;font-size:44px;line-height:1.15;color:var(--c);font-variant-numeric:tabular-nums}
+.tile span{font-weight:600}
+.tile small{color:var(--ink2);font-size:14px}
+h2{font-size:24px}
+.lead{color:var(--ink2);margin:0}
+.box{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:6px 6px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:520px;font-variant-numeric:tabular-nums}
+th,td{padding:10px 14px;text-align:start;border-bottom:1px solid var(--line);white-space:nowrap}
+thead th{font-family:var(--display);font-weight:700;font-size:15px;color:var(--ink2)}
+tbody tr:last-child td{border-bottom:0}
+td.num{font-weight:600}
+td a{color:var(--teal);font-weight:600;text-decoration:none;direction:ltr;unicode-bidi:isolate}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px}
+.row .sp{flex:1}
+.empty{color:var(--ink2);padding:14px}
+</style>
+</head>
+<body>
+<main id="lock"><img src="../a/logo.webp" alt="دَدَن" width="1022" height="634"><h1>صفحة خاصة</h1><p id="msg">افتحوها من الرابط الكامل اللي وصلكم.</p></main>
+<div class="wrap" id="app" hidden>
+  <header class="hdr"><div class="name"><img src="../a/logo.webp" alt="دَدَن"><span>أرقام الموقع</span></div><span class="sp"></span><small id="when"></small><button class="btn" type="button" id="again">حدّث</button></header>
+  <section><div class="row"><h2>اليوم</h2><span class="lead" id="todayDate"></span></div></section>
+  <div class="tiles" id="tiles"></div>
+  <section class="pane">
+    <div><h2>كل الأيام</h2><p class="lead">«جدد» يعني أول مرة يفتحون الصفحة من هذا الجهاز. العدّ بدون أسماء وبدون أي شي عن الأطفال.</p></div>
+    <div class="box"><table><thead><tr><th>اليوم</th><th>فتحوا الصفحة</th><th>جدد</th><th>فتحوا «جرّب اللعبة»</th><th>دخلوا اللعبة</th><th>القصة</th><th>تواصل</th><th>الدراسات</th></tr></thead><tbody id="days"></tbody></table></div>
+  </section>
+  <section class="pane">
+    <div class="row"><h2>سجّلوا «خبّروني عند الإطلاق»</h2><span class="lead" id="leadCount"></span><span class="sp"></span><button class="btn" type="button" id="csv">نزّلي القائمة</button></div>
+    <div class="box"><table><thead><tr><th>الاسم</th><th>رقم الواتساب</th><th>متى</th></tr></thead><tbody id="leads"></tbody></table></div>
+  </section>
+</div>
+<script>
+(function () {
+  var API = 'https://wonjydmwlaqpzanczizj.supabase.co/rest/v1/rpc/admin_report', KEY = 'sb_publishable_oVp-E7FX9CFzAdwWJbmz-Q_wqzaeN-T';
+  var k = location.hash.slice(1), msg = document.getElementById('msg'), $ = function (id) { return document.getElementById(id); }, last = null;
+  if (!k) return;
+  var num = new Intl.NumberFormat('en-US');
+  function cell(tr, text, cls) { var td = document.createElement('td'); td.textContent = text; if (cls) td.className = cls; tr.appendChild(td); return td; }
+  function day(s) { var p = s.split('-'); return +p[2] + '/' + +p[1]; }
+  function load() {
+    msg.textContent = 'لحظة...';
+    fetch(API, { method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ p_key: k }) })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (d) {
+        if (!d) { $('app').hidden = true; $('lock').hidden = false; msg.textContent = 'الرابط ناقص أو غلط. اطلبوه مرة ثانية كامل.'; return; }
+        last = d; draw(d); $('lock').hidden = true; $('app').hidden = false;
+      })
+      .catch(function () { if (!last) msg.textContent = 'ما قدرنا نوصل للأرقام. تأكدوا من الإنترنت وجربوا مرة ثانية.'; else $('when').textContent = 'ما تحدّثت، جربوا مرة ثانية'; });
+  }
+  function draw(d) {
+    var by = {}, order = [];
+    d.visits.forEach(function (v) { if (!by[v.day]) { by[v.day] = {}; order.push(v.day); } by[v.day][v.what] = v; });
+    var t = by[d.today] || {}, n = function (o, w, f) { return o[w] ? o[w][f || 'n'] : 0; };
+    var leadsToday = d.leads.filter(function (l) { return new Date(l.at).toLocaleDateString('en-CA', { timeZone: 'Asia/Qatar' }) === d.today; }).length;
+    var tiles = [['فتحوا الصفحة', n(t, 'home'), n(t, 'home', 'first') + ' منهم جدد', ''], ['فتحوا «جرّب اللعبة»', n(t, 'play'), '', 'pink'], ['دخلوا اللعبة', n(t, 'game'), '', 'purple'], ['سجّلوا', leadsToday, 'الكل: ' + num.format(d.leads.length), 'yellow']];
+    var box = $('tiles'); box.textContent = '';
+    tiles.forEach(function (x) {
+      var el = document.createElement('div'), b = document.createElement('b'), s = document.createElement('span'), sm = document.createElement('small');
+      el.className = 'tile ' + x[3]; b.textContent = num.format(x[1]); s.textContent = x[0]; sm.textContent = x[2];
+      el.appendChild(b); el.appendChild(s); if (x[2]) el.appendChild(sm); box.appendChild(el);
+    });
+    $('todayDate').textContent = day(d.today);
+    var tb = $('days'); tb.textContent = '';
+    if (!order.length) { var tr0 = document.createElement('tr'), td0 = cell(tr0, 'ما في زيارات للحين.', 'empty'); td0.colSpan = 8; tb.appendChild(tr0); }
+    order.forEach(function (dd) {
+      var o = by[dd], tr = document.createElement('tr');
+      cell(tr, day(dd)); cell(tr, num.format(n(o, 'home')), 'num'); cell(tr, num.format(n(o, 'home', 'first')));
+      ['play', 'game', 'story', 'contact', 'research'].forEach(function (w) { cell(tr, num.format(n(o, w))); });
+      tb.appendChild(tr);
+    });
+    var lb = $('leads'); lb.textContent = '';
+    $('leadCount').textContent = num.format(d.leads.length);
+    if (!d.leads.length) { var tr1 = document.createElement('tr'), td1 = cell(tr1, 'محد سجّل للحين.', 'empty'); td1.colSpan = 3; lb.appendChild(tr1); }
+    d.leads.forEach(function (l) {
+      var tr = document.createElement('tr'), td, a = document.createElement('a');
+      cell(tr, l.name).dir = 'auto';
+      td = document.createElement('td'); a.textContent = l.phone; a.href = 'https://wa.me/' + l.phone.replace(/\D/g, ''); a.target = '_blank'; a.rel = 'noopener'; td.appendChild(a); tr.appendChild(td);
+      cell(tr, new Date(l.at).toLocaleString('en-GB', { timeZone: 'Asia/Qatar', day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' }));
+      lb.appendChild(tr);
+    });
+    $('when').textContent = 'آخر تحديث ' + new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Qatar', hour: '2-digit', minute: '2-digit' });
+  }
+  $('again').addEventListener('click', load);
+  $('csv').addEventListener('click', function () {
+    if (!last) return;
+    var q = function (s) { return '"' + String(s).replace(/"/g, '""') + '"'; };
+    var rows = [['name', 'phone', 'time (Qatar)', 'source'].join(',')].concat(last.leads.map(function (l) { return [q(l.name), q(l.phone), q(new Date(l.at).toLocaleString('en-GB', { timeZone: 'Asia/Qatar' })), q(l.source)].join(','); }));
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8' })); a.download = 'dadan-signups.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+  document.addEventListener('visibilitychange', function () { if (!document.hidden && last) load(); });
+  load();
+})();
+</script>
+</body>
+</html>
