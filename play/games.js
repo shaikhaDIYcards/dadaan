@@ -305,7 +305,8 @@
     var rig = pb.querySelector(".rg");
     function act(a, ms) { if (rig && api.roboAct) api.roboAct(rig, a, ms); }
     var pm = c.add('<div class="fig av">' + api.figHTML() + "</div>" + dots(need, 0), "rr-pill rr-me");
-    function set(el, n) { var d = el.querySelectorAll("i"); for (var i = 0; i < d.length; i++) d[i].className = i < n ? "on" : ""; el.classList.remove("hop"); void el.offsetWidth; el.classList.add("hop"); }
+    if (api.rrVs) api.rrVs(c.stage, pb, pm);   /* the two stand side by side, like a real race */
+    function set(el, n) { var d = el.querySelectorAll("i"); for (var i = 0; i < d.length; i++) d[i].className = i < n ? "on" : ""; el.classList.remove("hop"); void el.offsetWidth; el.classList.add("hop"); if (api.rrLead) api.rrLead(el); }
     function say(t) { var b = c.add(t, "rr-say"); c.later(function () { b.style.opacity = 0; }, 1300); c.later(function () { b.remove(); }, 1600); }
     function beep(n) { if (api.tone) for (var i = 0; i < n; i++) api.tone(880 + (i % 2) * 440, i * 0.1, 0.08, "square", 0.035); }
     pb.addEventListener("click", function () { api.unlock(); beep(2); say("بيب بوب!"); if (api.robo) api.robo("b_hi"); act("score", 750); });
@@ -4600,4 +4601,310 @@
       "hoop", "pennant", "shellBase", "shellLid", "pearl", "musicNote", "mailboxPost", "mailFlag", "flatWagon", "nestTop", "popBucket", "leaf", "roboCar"].forEach(function (n) { var i = new Image(); i.src = BASE + n + ".webp"; });
   };
   TG.preloadArt();
+})();
+
+;
+/* ===================== جزيرة الألف: two new games =====================
+   x_rabbit   حديقة الأرنب: carrots grow in the soil, each carries a letter; pull the ones with our letter and feed the rabbit.
+   x_alif_mid ورشة السيارات: a car, a bus, a truck, a wrench and a tyre come in with their name missing its alif;
+              the child picks the alif in its middle shape (ـا) and the word is whole again (alif in the middle of words).
+   Pictures: art/alif/*.webp (Leonardo, same style as the island). */
+(function () {
+  "use strict";
+  var TG = window.TG; if (!TG || !TG.register) return;
+  var css = [
+    ".xr-bg,.xa-bg{pointer-events:none;user-select:none;overflow:hidden}.xr-bg img,.xa-bg img{display:block;width:100%;height:100%;max-width:none;object-fit:cover}",
+    ".xr-heart img{display:block;width:100%;height:auto}",
+    ".xr-rab{position:absolute;padding:0;border:0;background:none;transform:translate(-50%,-100%);cursor:pointer;z-index:4}",
+    ".xr-rab img{position:absolute;left:50%;bottom:0;height:100%;width:auto;translate:-50% 0;display:none;pointer-events:none;filter:drop-shadow(0 6px 0 rgba(60,40,20,.12))}",
+    ".xr-rab[data-p='0'] .xr-r0{display:block;transform:scaleX(-1)}.xr-rab[data-p='1'] .xr-r1{display:block}.xr-rab[data-p='2'] .xr-r2{display:block;height:84%}",
+    ".xr-rab.munch .xr-r1{animation:xrmunch .22s ease-in-out infinite alternate;transform-origin:50% 100%}",
+    "@keyframes xrmunch{to{transform:scaleY(.95) scaleX(1.03)}}",
+    ".xr-rab.hop{animation:xrhop .62s cubic-bezier(.3,.7,.4,1)}",
+    "@keyframes xrhop{0%{transform:translate(-50%,-100%)}40%{transform:translate(-50%,-150%)}100%{transform:translate(-50%,-100%)}}",
+    ".xr-rab.twitch{animation:xrtw .5s ease-in-out}",
+    "@keyframes xrtw{30%{transform:translate(-50%,-100%) rotate(-3deg)}60%{transform:translate(-50%,-104%) rotate(2deg)}}",
+    ".xr-spot{position:absolute;padding:0;border:0;background:none;transform:translate(-50%,-100%);cursor:pointer;z-index:3;touch-action:manipulation}",
+    ".xr-spot img{position:absolute;left:50%;bottom:0;width:100%;height:auto;translate:-50% 0;pointer-events:none}",
+    ".xr-spot .xr-h{display:none;width:96%}",
+    ".xr-spot.pulled .xr-c,.xr-spot.pulled .p-lbl{display:none}.xr-spot.pulled .xr-h{display:block}",
+    ".xr-spot .p-lbl{position:absolute;left:50%;top:0;translate:-50% -10%;z-index:2}",
+    ".xr-spot.grow{animation:xrgrow .5s cubic-bezier(.3,1.6,.5,1)}",
+    "@keyframes xrgrow{from{transform:translate(-50%,-100%) scale(.2,.4)}}",
+    ".xr-spot.tug .xr-c{animation:xrtug .3s ease-in-out 2}",
+    "@keyframes xrtug{50%{transform:translateY(-8%)}}",
+    ".xr-fly{position:absolute;z-index:6;pointer-events:none}.xr-fly img{display:block;width:100%;height:auto;transform:rotate(-30deg)}",
+    ".xr-heart{position:absolute;z-index:7;pointer-events:none;transform:translate(-50%,-50%);animation:xrheart 1.1s ease-out forwards}",
+    "@keyframes xrheart{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}25%{opacity:1;transform:translate(-50%,-90%) scale(1.1)}100%{opacity:0;transform:translate(-50%,-260%) scale(.9)}}",
+    ".xa-veh{position:absolute;z-index:3;pointer-events:none}",
+    ".xa-veh img{display:block;width:100%;height:auto;filter:drop-shadow(0 8px 0 rgba(40,50,60,.14))}",
+    ".xa-veh.bump img{animation:xabump .5s ease-in-out 2}",
+    "@keyframes xabump{40%{transform:translateY(-7%) rotate(-1.5deg)}}",
+    ".xa-veh.roll img{animation:xaroll .9s linear infinite}",
+    "@keyframes xaroll{to{transform:rotate(-360deg)}}",
+    ".xa-sign{position:absolute;z-index:5;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;gap:0;direction:rtl;padding:2px 26px 10px;min-width:160px;background:linear-gradient(#F7E4C0,#EDCF9A);border:4px solid #5A3A22;border-radius:18px;box-shadow:0 6px 0 #5A3A22,inset 0 3px 0 rgba(255,255,255,.5);font:700 var(--fs,64px)/1.5 var(--naskh);color:#3E2A1A;white-space:nowrap;pointer-events:none}",
+    ".xa-sign::before,.xa-sign::after{content:'';position:absolute;top:-34px;width:4px;height:32px;background:#5A3A22;border-radius:2px}",
+    ".xa-sign::before{left:22%}.xa-sign::after{right:22%}",
+    ".xa-gap{display:inline-block;width:.42em;height:1.05em;margin:0 .06em;border:3px dashed #E5532B;border-radius:10px;background:rgba(255,255,255,.65);vertical-align:-.2em;animation:xagap 1.2s ease-in-out infinite}",
+    "@keyframes xagap{50%{background:rgba(255,226,170,.9)}}",
+    ".xa-hl{color:#E5532B}",
+    ".xa-sign.done{animation:xadone .6s cubic-bezier(.3,1.6,.5,1)}",
+    "@keyframes xadone{40%{transform:translate(-50%,-50%) scale(1.12)}}",
+    ".xa-piece{position:absolute;z-index:6;width:var(--ps,86px);height:var(--ps,86px);display:grid;place-items:center;padding:0;background:#FFFDF5;border:4px solid #5A3A22;border-radius:20px;box-shadow:0 6px 0 #5A3A22;font:700 calc(var(--ps,86px)*.6)/1.5 var(--naskh);color:#3E2A1A;cursor:pointer;touch-action:manipulation}",
+    ".xa-piece:active{scale:.94}",
+    ".xa-piece.p-hint{animation:pglow2 1.1s ease-in-out infinite}",
+    "@keyframes pglow2{50%{box-shadow:0 6px 0 #5A3A22,0 0 0 9px rgba(255,207,61,.85)}}",
+    ".xa-piece.gone{opacity:0;pointer-events:none;transition:opacity .25s}",
+    ".xa-spark{position:absolute;z-index:7;width:16px;height:16px;margin:-8px 0 0 -8px;pointer-events:none;background:#FFD23F;clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);animation:xaspark .9s ease-out forwards}",
+    "@keyframes xaspark{from{transform:translate(0,0) scale(.4) rotate(0);opacity:1}to{transform:translate(var(--dx),var(--dy)) scale(1.3) rotate(160deg);opacity:0}}"
+  ];
+  function addCss() { if (document.getElementById("alifGamesCss")) return; var st = document.createElement("style"); st.id = "alifGamesCss"; st.textContent = css.join("\n"); document.head.appendChild(st); }
+  function cover(c, iw, ih) { var k = Math.max(c.W / iw, c.H / ih), ox = (c.W - iw * k) / 2, oy = (c.H - ih * k) / 2; return { k: k, at: function (x, y) { return [ox + x * k, oy + y * k]; } }; }
+  function img(src, cls) { return '<img' + (cls ? ' class="' + cls + '"' : "") + ' src="art/alif/' + src + '.webp" alt="" draggable="false">'; }
+
+  TG.art.x_rabbitIcon = '<img src="art/alif/rab_sit.webp" alt="" style="width:100%;height:auto;transform:scaleX(-1)">';
+  TG.art.x_alifMidIcon = '<img src="art/alif/car.webp" alt="" style="width:100%;height:auto">';
+  TG.gameLines = TG.gameLines || {};
+  TG.gameLines.x_rabbit = {
+    intro: ["الأرنب جائع! اقطف الجزر الذي عليه حرفنا، وأطعمه.", "الأرنب جائع! اقطفي الجزر الذي عليه حرفنا، وأطعميه."],
+    help: ["اضغط على الجزرة التي عليها الحرف، فتطير إلى الأرنب.", "اضغطي على الجزرة التي عليها الحرف، فتطير إلى الأرنب."] };
+  TG.gameLines.x_alif_mid = {
+    intro: ["ساعدني في إصلاح السيارات! ضع حرف الألف في مكانه وسط الكلمة.", "ساعديني في إصلاح السيارات! ضعي حرف الألف في مكانه وسط الكلمة."],
+    help: ["الألف في وسط الكلمة يتصل بالحرف الذي قبله فقط. اختر شكله.", "الألف في وسط الكلمة يتصل بالحرف الذي قبله فقط. اختاري شكله."] };
+
+  /* ---------------- حديقة الأرنب ---------------- */
+  TG.register("x_rabbit", {
+    kind: "x_rabbit", lines: "x_rabbit", title: "حديقة الأرنب", mascot: "x_rabbitIcon", winWord: "شبع الأرنب!",
+    goal: function (T) { return T("اقطف", "اقطفي"); },
+    winText: function (c) { return c.T("أطعمت الأرنب جزر حرف ال" + c.L.name + "، أنت و", "أطعمتِ الأرنب جزر حرف ال" + c.L.name + "، أنتِ و") + c.api.friendName(); },
+    onWin: function (c) { TG.markX(c, "x_rabbit"); },
+    start: function (c) {
+      addCss(); c.total = 6; c.setScore(0);
+      var cv = cover(c, 1376, 768), k = cv.k, eating = false, over = false;
+      c.add(img("garden_bg"), "xr-bg p-abs", "width:" + c.W + "px;height:" + c.H + "px");
+      c.add(c.api.figHTML(), "fig p-abs", "left:" + (c.W - 128) + "px;top:" + (c.H - 196) + "px;width:116px;z-index:5");
+      var rp = cv.at(245, 662), rh = Math.max(110, Math.min(c.H * .34, 250 * k));
+      var rab = c.add(img("rab_sit", "xr-r0") + img("rab_eat", "xr-r1") + img("rab_hop", "xr-r2"), "xr-rab p-abs", "left:" + rp[0] + "px;top:" + rp[1] + "px;height:" + rh + "px;width:" + (rh * 1.2) + "px", "button");
+      rab.setAttribute("data-p", "0"); rab.setAttribute("aria-label", "الأرنب");
+      function pose(p) { rab.setAttribute("data-p", String(p)); }
+      function hop() { if (eating) return; pose(2); rab.classList.remove("hop"); void rab.offsetWidth; rab.classList.add("hop"); c.later(function () { if (!eating) pose(0); rab.classList.remove("hop"); }, 640); }
+      rab.addEventListener("click", function () { c.api.unlock(); hop(); c.api.tts("أرنب"); c.say("أَرْنَب", rp[0], rp[1] - rh - 6); });
+      (function idle() { c.later(function () { if (!eating && !over) { rab.classList.remove("twitch"); void rab.offsetWidth; rab.classList.add("twitch"); } idle(); }, 3200 + Math.random() * 2600); })();
+      /* six places in the soil */
+      var P = [[520, 612], [770, 604], [1020, 616], [455, 722], [745, 716], [1040, 724]], sw = Math.max(80, Math.min(150 * k, c.H * .2)), spots = [];
+      var start = c.shuffle([c.ch, c.ch, c.ch].concat(c.alike(3)));
+      P.forEach(function (q, i) {
+        var p = cv.at(q[0], q[1]), el = c.add(img("carrot_soil", "xr-c") + img("hole", "xr-h") + "<b class='p-lbl'></b>", "xr-spot p-abs", "left:" + p[0] + "px;top:" + p[1] + "px;width:" + sw + "px;height:" + (sw * 1.02) + "px", "button");
+        var s = { el: el, x: p[0], y: p[1], ch: "", pulled: false };
+        el.querySelector(".p-lbl").style.setProperty("--s", Math.round(sw * .44) + "px");
+        el.addEventListener("click", function () { tap(s); });
+        set(s, start[i]); spots.push(s);
+      });
+      function set(s, ch) { s.ch = ch; s.el.querySelector(".p-lbl").textContent = ch; s.el.setAttribute("data-ok", ch === c.ch ? "1" : "0"); s.el.setAttribute("data-ch", ch); s.el.setAttribute("aria-label", "جزرة عليها حرف ال" + c.name(ch)); s.el.classList.remove("p-hint"); }
+      function pick() { var n = spots.filter(function (s) { return !s.pulled && s.ch === c.ch; }).length; return n < 2 || Math.random() < 0.38 ? c.ch : c.alike(1)[0]; }
+      function tap(s) {
+        if (!c.alive || over || s.pulled) return; c.api.unlock();
+        if (s.ch !== c.ch) { s.el.classList.remove("tug"); void s.el.offsetWidth; s.el.classList.add("tug"); c.wrong(s.el, s.ch, s.x, s.y - sw * 1.05); return; }
+        s.pulled = true; c.sfx.pop(); spots.forEach(function (o) { o.el.classList.remove("p-hint"); });
+        var fw = sw * .7, fly = c.add(img("carrot"), "xr-fly p-abs", "left:" + (s.x - fw / 2) + "px;top:" + (s.y - sw * .6 - fw / 2) + "px;width:" + fw + "px");
+        var mx = rp[0] + rh * .32, my = rp[1] - rh * .52;
+        c.move(fly, mx - fw / 2, my - fw / 2, 650, 120, function () {
+          fly.remove(); eating = true; pose(1); rab.classList.add("munch");
+          if (c.api.tone) { for (var j = 0; j < 4; j++) c.api.tone(520 + (j % 2) * 140, j * 0.16, 0.06, "triangle", 0.04); }
+          c.add(img("heart"), "xr-heart p-abs", "left:" + (rp[0] + rh * .1) + "px;top:" + (rp[1] - rh * .9) + "px;width:" + Math.round(rh * .26) + "px");
+          c.later(function () { rab.classList.remove("munch"); eating = false; pose(0); Array.prototype.forEach.call(c.stage.querySelectorAll(".xr-heart"), function (h) { h.remove(); }); }, 1100);
+          c.setScore(c.score + 1); c.miss = 0;
+          if (c.score >= c.total) { over = true; c.later(function () { hop(); c.later(hop, 700); }, 1150); c.later(c.win, 2200); }
+        });
+        c.later(function () { if (over) return; s.pulled = false; set(s, pick()); s.el.classList.remove("pulled", "grow"); void s.el.offsetWidth; s.el.classList.add("grow"); }, 1500);
+        s.el.classList.add("pulled");
+      }
+    }
+  });
+
+  /* ---------------- ورشة السيارات: the alif in the middle of words ---------------- */
+  var MID = [
+    { w: "سيارة", a: "سيـ", b: "رة", pic: "car", h: 210 },
+    { w: "باص", a: "بـ", b: "ص", pic: "bus", h: 250 },
+    { w: "شاحنة", a: "شـ", b: "حنة", pic: "truck", h: 205 },
+    { w: "مفتاح", a: "مفتـ", b: "ح", pic: "wrench", h: 170, drop: 1 },
+    { w: "إطار", a: "إطـ", b: "ر", pic: "tyre", h: 175, roll: 1 }
+  ];
+  /* every choice is an alif: the child picks the one that sits in the middle of a word */
+  var MIDX = [["أ", "ألف عليها همزة"], ["إ", "ألف تحتها همزة"]];
+  TG.register("x_alif_mid", {
+    kind: "x_alif_mid", lines: "x_alif_mid", title: "ورشة السيارات", mascot: "x_alifMidIcon", winWord: "أصلحتها كلها!",
+    goal: function (T) { return T("ضع", "ضعي"); }, goalCh: function () { return "ـا"; },
+    winText: function (c) { return c.T("عرفت الألف وهو في وسط الكلمة، أنت و", "عرفتِ الألف وهو في وسط الكلمة، أنتِ و") + c.api.friendName(); },
+    onWin: function (c) { TG.markX(c, "x_alif_mid"); },
+    replay: function (c) { if (c.word) c.api.tts(c.word); },
+    start: function (c) {
+      addCss(); var order = c.shuffle(MID.slice()); c.total = order.length; c.setScore(0);
+      var cv = cover(c, 1376, 768), k = cv.k, round = -1, veh = null, sign = null, pieces = [], busy = true;
+      c.add(img("garage_bg"), "xa-bg p-abs", "width:" + c.W + "px;height:" + c.H + "px");
+      c.add(c.api.figHTML(), "fig p-abs", "left:16px;top:" + (c.H - 196) + "px;width:116px;z-index:5");
+      var floorY = Math.min(c.H - 120, cv.at(0, 640)[1]), cx = c.W * .54, ps = Math.max(70, Math.min(96, c.H * .15));
+      function spark(x, y) { for (var i = 0; i < 9; i++) { var a = i / 9 * Math.PI * 2, d = 50 + Math.random() * 40; c.add("", "xa-spark p-abs", "left:" + x + "px;top:" + y + "px;--dx:" + (Math.cos(a) * d).toFixed(0) + "px;--dy:" + (Math.sin(a) * d).toFixed(0) + "px"); } c.later(function () { Array.prototype.forEach.call(c.stage.querySelectorAll(".xa-spark"), function (e) { e.remove(); }); }, 950); }
+      function honk() { if (c.api.tone) { c.api.tone(392, 0, 0.16, "square", 0.045); c.api.tone(494, 0.2, 0.22, "square", 0.045); } }
+      function next() {
+        round++; c.miss = 0; busy = true;
+        var it = order[round], vh = Math.max(90, Math.min(c.H * .36, it.h * k)), vw = vh * (it.pic === "bus" ? 1.65 : it.pic === "car" ? 1.65 : it.pic === "truck" ? 1.87 : 1);
+        c.word = it.w;
+        veh = c.add(img(it.pic), "xa-veh p-abs" + (it.roll ? " roll" : ""), "left:" + (it.drop ? cx - vw / 2 : c.W + 20) + "px;top:" + (it.drop ? -vh : floorY - vh) + "px;width:" + vw + "px");
+        veh.vw = vw; veh.vh = vh;
+        c.move(veh, cx - vw / 2, floorY - vh, it.drop ? 700 : 1100, 0, function () {
+          veh.classList.remove("roll"); if (!it.drop && !it.roll) honk();
+          sign = c.add('<span>' + it.a + '</span><span class="xa-gap"></span><span>' + it.b + "</span>", "xa-sign p-abs", "left:" + cx + "px;top:" + Math.max(c.H * .27, floorY - vh - 74) + "px;--fs:" + Math.round(Math.max(44, Math.min(72, c.H * .11))) + "px");
+          c.later(function () { c.api.tts(it.w); }, 250);
+          var opts = c.shuffle(["ـا"].concat(MIDX.map(function (m) { return m[0]; })));
+          pieces = opts.map(function (t, i) {
+            var x = cx + (i - 1) * (ps + 26) - ps / 2, y = c.H - ps - 18;
+            var el = c.add(t, "xa-piece p-abs", "left:" + x + "px;top:" + (c.H + ps) + "px;--ps:" + ps + "px", "button");
+            el.setAttribute("data-ok", t === "ـا" ? "1" : "0"); el.setAttribute("aria-label", t === "ـا" ? "ألف" : "حرف آخر");
+            c.later(function () { c.move(el, x, y, 420, 0); }, 120 + i * 110);
+            el.addEventListener("click", function () { tap(el, t); });
+            return el;
+          });
+          c.later(function () { busy = false; }, 600);
+        });
+      }
+      function tap(el, t) {
+        if (busy || !c.alive) return; c.api.unlock();
+        if (t !== "ـا") {
+          var nm = (MIDX.filter(function (m) { return m[0] === t; })[0] || [t, ""])[1];
+          el.classList.remove("p-no"); void el.offsetWidth; el.classList.add("p-no"); c.sfx.no(); c.api.tts(nm);
+          var r = el.getBoundingClientRect(), s = c.stage.getBoundingClientRect();
+          c.say("هذه في أول الكلمة، أين ألف الوسط؟", r.left - s.left + r.width / 2, r.top - s.top - 10);
+          if (c.api.track) c.api.track("miss", c.L.id, t);
+          c.miss++; if (c.miss >= 2) pieces.forEach(function (p) { if (p.getAttribute("data-ok") === "1") p.classList.add("p-hint"); });
+          return;
+        }
+        busy = true; c.sfx.pop(); el.classList.remove("p-hint");
+        var g = sign.querySelector(".xa-gap"), gr = g.getBoundingClientRect(), s2 = c.stage.getBoundingClientRect();
+        pieces.forEach(function (p) { if (p !== el) p.classList.add("gone"); });
+        c.move(el, gr.left - s2.left + gr.width / 2 - ps / 2, gr.top - s2.top + gr.height / 2 - ps / 2, 520, 60, function () {
+          var it = order[round];
+          el.remove(); sign.innerHTML = "<span>" + it.a.replace("ـ", "") + '<b class="xa-hl">ا</b>' + it.b + "</span>"; sign.classList.add("done");
+          spark(cx, floorY - veh.vh * .5); veh.classList.add("bump"); honk();
+          c.later(function () { c.api.tts(it.w); }, 200);
+          c.setScore(c.score + 1);
+          c.later(function () {
+            pieces.forEach(function (p) { p.remove(); });
+            if (c.score >= c.total) { c.later(c.win, 300); return; }
+            sign.style.transition = "opacity .3s"; sign.style.opacity = "0";
+            var v = veh; v.classList.remove("bump"); if (order[round].roll) v.classList.add("roll");
+            c.move(v, -v.vw - 20, floorY - v.vh, 900, 0, function () { v.remove(); });
+            c.later(function () { if (sign) sign.remove(); next(); }, 950);
+          }, 1900);
+        });
+      }
+      c.later(next, 300);
+    }
+  });
+})();
+
+;
+/* ===================== صدفة الأصوات: the letter with its three حركات, said right =====================
+   Part 1: three pearls (أَ أُ إِ); each one tapped says its sound (the recorded v/<id>-f|d|k) and shows how the mouth makes it.
+   Part 2: a sound is heard, the child taps its pearl (4 rounds). Same for every letter (the island's letter). */
+(function () {
+  "use strict";
+  var TG = window.TG; if (!TG || !TG.register) return;
+  var css = [
+    ".xs-bg{pointer-events:none;overflow:hidden}.xs-bg img{display:block;width:100%;height:100%;max-width:none;object-fit:cover}",
+    ".xs-pearl{position:absolute;padding:0;border:0;background:none;cursor:pointer;touch-action:manipulation;z-index:4;transition:transform .25s cubic-bezier(.3,1.6,.5,1)}",
+    ".xs-pearl>img{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;filter:drop-shadow(0 8px 0 rgba(150,90,110,.18))}",
+    ".xs-pearl b{position:absolute;inset:0;display:grid;place-items:center;font:700 calc(var(--pw)*.5)/1 var(--naskh);padding-bottom:calc(var(--pw)*.06);pointer-events:none}",
+    ".xs-pearl.on{transform:scale(1.14)}",
+    ".xs-pearl.on>img{filter:drop-shadow(0 0 14px rgba(255,236,150,.95)) drop-shadow(0 8px 0 rgba(150,90,110,.18))}",
+    ".xs-pearl.heard::after{content:'';position:absolute;right:2%;top:2%;width:26%;height:26%;border-radius:50%;background:#FFD23F;border:3px solid #fff;box-shadow:0 2px 0 rgba(90,58,34,.3)}",
+    ".xs-pearl.p-no{animation:pwob .4s ease}",
+    ".xs-pearl.p-hint>img{animation:xsglow 1.1s ease-in-out infinite}",
+    "@keyframes xsglow{50%{filter:drop-shadow(0 0 16px rgba(255,207,61,1))}}",
+    ".xs-mouth{position:absolute;z-index:5;pointer-events:none;background:#FFFDF5;border:4px solid #5A3A22;border-radius:50%;box-shadow:0 6px 0 rgba(90,58,34,.3);overflow:hidden;opacity:0;transform:scale(.6);transition:opacity .2s,transform .3s cubic-bezier(.3,1.6,.5,1)}",
+    ".xs-mouth.on{opacity:1;transform:scale(1)}",
+    ".xs-mouth img{position:absolute;left:50%;top:50%;width:92%;translate:-50% -46%}",
+    ".xs-tip{position:absolute;z-index:5;transform:translate(-50%,0);background:#FFFDF5;border:3px solid #5A3A22;border-radius:16px;padding:2px 14px 5px;font-weight:800;font-size:1.05rem;color:#4A3020;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .2s}",
+    ".xs-tip.on{opacity:1}",
+    ".xs-ear{position:absolute;z-index:6;transform:translate(-50%,-50%);padding:0;border:4px solid #5A3A22;border-radius:50%;background:#FFD23F;box-shadow:0 6px 0 #5A3A22;display:grid;place-items:center;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .3s}",
+    ".xs-ear.on{opacity:1;pointer-events:auto;animation:xsear 1.4s ease-in-out infinite}",
+    ".xs-ear svg{width:55%;height:55%;stroke:#5A3A22;fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}",
+    "@keyframes xsear{50%{transform:translate(-50%,-50%) scale(1.08)}}",
+    ".xs-bub{position:absolute;z-index:3;border-radius:50%;border:2.5px solid rgba(255,255,255,.95);background:rgba(220,245,255,.35);pointer-events:none;animation:xsbub 4s linear infinite}",
+    "@keyframes xsbub{0%{transform:translateY(0);opacity:0}10%{opacity:1}100%{transform:translateY(-260px);opacity:0}}"
+  ];
+  function addCss() { if (document.getElementById("xsCss")) return; var st = document.createElement("style"); st.id = "xsCss"; st.textContent = css.join("\n"); document.head.appendChild(st); }
+  TG.art.x_soundIcon = '<img src="art/alif/shell.webp" alt="" style="width:100%;height:auto">';
+  TG.gameLines.x_sound = {
+    intro: ["هذه صدفة الأصوات! اضغط على كل لؤلؤة، واسمع صوت الحرف، وقله معي.", "هذه صدفة الأصوات! اضغطي على كل لؤلؤة، واسمعي صوت الحرف، وقوليه معي."],
+    help: ["الفتحة نفتح فيها الفم، والضمة نضم الشفتين، والكسرة نبتسم.", "الفتحة نفتح فيها الفم، والضمة نضم الشفتين، والكسرة نبتسم."] };
+  var KS = ["f", "d", "k"], MOUTH = { f: "mouthA", d: "mouthU", k: "mouthI" };
+  var TIP = { f: ["افتح فمك", "افتحي فمك"], d: ["ضمّ شفتيك", "ضمّي شفتيك"], k: ["ابتسم", "ابتسمي"] };
+  var COL = { f: "#E5532B", d: "#2E7FC1", k: "#2F9A4E" };
+  TG.register("x_sound", {
+    kind: "x_sound", lines: "x_sound", title: "صدفة الأصوات", mascot: "x_soundIcon", winWord: "أذن ذهبية!", rival: false,
+    goal: function (T) { return T("اسمع وقل", "اسمعي وقولي"); },
+    goalCh: function (L) { return L.ch; },
+    winText: function (c) { return c.T("سمعت حرف ال" + c.L.name + " مع الفتحة والضمة والكسرة، أنت و", "سمعتِ حرف ال" + c.L.name + " مع الفتحة والضمة والكسرة، أنتِ و") + c.api.friendName(); },
+    onWin: function (c) { TG.markX(c, "x_sound"); },
+    replay: function (c) { if (c.want) c.api.speakSyl(c.L, c.want); },
+    start: function (c) {
+      addCss(); c.total = 4; c.setScore(0);
+      var L = c.L, api = c.api, quiz = false, busy = false, heard = {}, want = null;
+      c.add('<img src="art/alif/shell_bg.webp" alt="" draggable="false">', "xs-bg p-abs", "width:" + c.W + "px;height:" + c.H + "px");
+      for (var b = 0; b < 7; b++) { var bs = 10 + Math.random() * 18; c.add("", "xs-bub p-abs", "left:" + (c.W * (.08 + Math.random() * .84)) + "px;top:" + (c.H * (.55 + Math.random() * .4)) + "px;width:" + bs + "px;height:" + bs + "px;animation-delay:" + (-Math.random() * 4).toFixed(2) + "s;animation-duration:" + (3.5 + Math.random() * 2).toFixed(2) + "s"); }
+      c.add(api.figHTML(), "fig p-abs", "left:" + (c.W - 132) + "px;top:" + (c.H - 196) + "px;width:116px;z-index:5");
+      var pw = Math.max(92, Math.min(c.H * .26, c.W * .17, 170)), gap = pw * .42, y = c.H * .6;
+      var mw = Math.max(80, Math.min(c.H * .22, 130)), mouth = c.add('<img src="art/' + MOUTH.f + '.webp" alt="">', "xs-mouth p-abs", "width:" + mw + "px;height:" + mw + "px;left:" + (c.W / 2 - mw / 2) + "px;top:" + Math.max(64, y - pw / 2 - mw - 46) + "px");
+      var tip = c.add("", "xs-tip p-abs", "left:" + (c.W / 2) + "px;top:" + (Math.max(64, y - pw / 2 - mw - 46) + mw + 6) + "px");
+      var ear = c.add('<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"/><path d="M15.5 9a4 4 0 0 1 0 6"/><path d="M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>', "xs-ear p-abs", "width:" + (pw * .56) + "px;height:" + (pw * .56) + "px;left:" + (c.W / 2) + "px;top:" + Math.min(c.H - pw * .32, y + pw * .9) + "px", "button");
+      ear.setAttribute("aria-label", "اسمع مرة أخرى");
+      ear.addEventListener("click", function () { api.unlock(); if (want) api.speakSyl(L, want); });
+      /* the pearls, right to left: فتحة ضمة كسرة */
+      var pearls = KS.map(function (k, i) {
+        var x = c.W / 2 + (1 - i) * (pw + gap) - pw / 2;
+        var el = c.add('<img src="art/alif/pearl.webp" alt=""><b style="color:' + COL[k] + '">' + api.syl(L, k) + "</b>", "xs-pearl p-abs", "left:" + x + "px;top:" + (y - pw / 2) + "px;width:" + pw + "px;height:" + pw + "px;--pw:" + pw + "px", "button");
+        el.setAttribute("aria-label", api.syl(L, k)); el.setAttribute("data-k", k);
+        el.addEventListener("click", function () { tap(el, k); });
+        return el;
+      });
+      function show(k) {
+        mouth.querySelector("img").src = "art/" + MOUTH[k] + ".webp"; mouth.classList.add("on");
+        tip.textContent = c.T(TIP[k][0], TIP[k][1]); tip.style.color = COL[k]; tip.classList.add("on");
+        clearTimeout(show.t); show.t = setTimeout(function () { mouth.classList.remove("on"); tip.classList.remove("on"); }, 1800);
+      }
+      function glow(el) { pearls.forEach(function (p) { p.classList.remove("on"); }); el.classList.add("on"); c.later(function () { el.classList.remove("on"); }, 900); }
+      function tap(el, k) {
+        if (!c.alive || busy) return; api.unlock();
+        if (!quiz) {
+          glow(el); show(k); api.speakSyl(L, k); heard[k] = true; el.classList.add("heard");
+          if (Object.keys(heard).length === 3 && !c.allHeard) { c.allHeard = true; busy = true; c.later(startQuiz, 1900); }
+          return;
+        }
+        if (k !== want) {
+          el.classList.remove("p-no"); void el.offsetWidth; el.classList.add("p-no"); c.sfx.no(); api.speakSyl(L, k);
+          if (api.track) api.track("miss", L.id, api.syl(L, k));
+          c.miss++; if (c.miss >= 2) pearls.forEach(function (p) { if (p.getAttribute("data-k") === want) p.classList.add("p-hint"); });
+          return;
+        }
+        busy = true; c.sfx.pop(); glow(el); show(k); el.classList.remove("p-hint");
+        var r = el.getBoundingClientRect(), s = c.stage.getBoundingClientRect(); c.burst(r.left - s.left + r.width / 2, r.top - s.top + r.height / 2);
+        c.later(function () { api.speakSyl(L, k); }, 150);
+        c.setScore(c.score + 1);
+        if (c.score >= c.total) { c.later(c.win, 1300); return; }
+        c.later(ask, 1700);
+      }
+      function startQuiz() {
+        quiz = true; pearls.forEach(function (p) { p.classList.remove("heard"); });
+        var line = ["الآن اسمع جيدًا، واضغط على اللؤلؤة التي تقول هذا الصوت.", "الآن اسمعي جيدًا، واضغطي على اللؤلؤة التي تقول هذا الصوت."], went = false;
+        function go() { if (went || !c.alive) return; went = true; ear.classList.add("on"); ask(); }
+        if (api.talk) api.talk("g_x_sound_q", line, go); c.later(go, 1200 + c.T(line[0], line[1]).length * 80);
+      }
+      var last = null;
+      function ask() {
+        c.miss = 0; var opts = KS.filter(function (k) { return k !== last; }); want = opts[Math.floor(Math.random() * opts.length)]; last = want; c.want = want;
+        api.speakSyl(L, want); c.later(function () { busy = false; }, 500);
+      }
+    }
+  });
 })();
