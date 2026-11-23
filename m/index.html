@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#A5E0F0">
+<meta name="robots" content="noindex,nofollow">
+<title>دَدَن</title>
+<meta name="description" content="دَدَن: لعبة حروف وكرتون يرغّبان الطفل في تعلّم العربية.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@500;700;800&display=swap">
+<style>
+/* The page the event QR opens, made for a phone held upright and for people in a hurry: almost no reading.
+   Top to bottom it is the game's own landscape: the sky, the Alif island, the sea carrying one line of message,
+   six pictures from the game and a few seconds of the cartoon, then the lawn with the short survey and the
+   founder's note. The game itself is not linked from here: it is not public before launch.
+   Colours are taken from the island picture. One typeface, the game's own. Light by the owner's choice, no emoji. */
+:root {
+  color-scheme: light;
+  --sky: #A5E0F0;
+  --sea: #0E7482; --sea-d: #0A5560; --foam: #E4F6F8;
+  --grass: #A5CD57; --grass-d: #4C8A1B; --leaf: #23480A;
+  --ink: #17333B; --soft: #47626B;
+  --orange-btn: #C94E24; --orange-d: #8F3513;
+  --sun: #FFCF3D; --note: #FFF3C4;
+  --wa: #128C4B; --wa-d: #0B6234;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; color: var(--ink); background: var(--sky);
+  font-family: "Baloo Bhaijaan 2", "Segoe UI", Tahoma, system-ui, sans-serif; font-weight: 500; font-size: 18px; line-height: 1.55;
+}
+h1, h2, h3, p, figure { margin: 0; }
+a { color: inherit; }
+[hidden] { display: none !important; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+[dir="ltr"] { unicode-bidi: isolate; }
+:focus-visible { outline: 4px solid var(--sun); outline-offset: 3px; }
+main, footer { max-width: 560px; margin-inline: auto; }
+.col { padding-inline: max(20px, env(safe-area-inset-right, 0px)) max(20px, env(safe-area-inset-left, 0px)); }
+
+/* ---------- sky and island ---------- */
+.top { background: var(--sky); position: relative; padding-top: calc(14px + env(safe-area-inset-top, 0px)); }
+.top .logo { display: block; height: 60px; width: auto; margin-inline-start: 20px; }
+.top .isle { display: block; width: 100%; height: auto; margin-top: -6px; }
+.top::after { content: ""; position: absolute; inset: auto 0 0 0; height: 44px; background: linear-gradient(rgba(14, 116, 130, 0), var(--sea)); }
+
+/* ---------- the sea: one line, the pictures, the cartoon ---------- */
+.sea { background: var(--sea); color: #fff; padding: 8px 0 34px; }
+.sea h1 { font-weight: 800; font-size: 36px; line-height: 1.3; text-wrap: balance; }
+.sea .lead { margin-top: 6px; color: var(--foam); }
+
+.pics { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 10px; margin-top: 20px; }
+.pics img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; background: var(--sky); border: 3px solid #fff; border-radius: 14px; }
+.pics figcaption { margin-top: 3px; font-weight: 700; font-size: 15px; line-height: 1.35; }
+
+.film { margin-top: 24px; }
+.film video { display: block; width: 100%; aspect-ratio: 16 / 9; background: var(--sky); border: 5px solid #fff; border-radius: 20px; box-shadow: -7px 9px 0 var(--sea-d); }
+.film figcaption { margin-top: 16px; font-weight: 700; font-size: 15px; color: var(--foam); }
+
+/* ---------- the lawn: the survey, then the founder's note ---------- */
+.lawn { background: var(--grass); padding: 30px 0 22px; }
+
+.join { background: #fff; border-radius: 22px; padding: 18px 16px 16px; box-shadow: -7px 9px 0 var(--grass-d); }
+.join h2 { font-weight: 800; font-size: 27px; line-height: 1.3; color: var(--sea-d); }
+.join > p { margin-top: 2px; }
+.join fieldset { border: 0; padding: 0; margin: 12px 0 0; min-width: 0; }
+.chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.chips label { position: relative; }
+.chips input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.chips span { display: block; padding: 5px 12px; border: 2px solid var(--sea); border-radius: 999px; font-weight: 700; font-size: 16px; color: var(--sea-d); background: #fff; }
+.chips input:checked + span { background: var(--sea); color: #fff; }
+.chips input:focus-visible + span { outline: 4px solid var(--sun); outline-offset: 2px; }
+.fields { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.fields .wide { grid-column: 1 / -1; }
+.fields input {
+  display: block; width: 100%; min-width: 0; font: inherit; font-size: 17px; color: var(--ink);
+  background: #F3FAFB; border: 2px solid #8FC3CB; border-radius: 12px; padding: 8px 12px;
+}
+.fields input::placeholder { color: #5E7B84; opacity: 1; }
+.fields input:focus { border-color: var(--sea); outline: 3px solid var(--sun); outline-offset: 1px; }
+.fields input[type="tel"]::placeholder { direction: rtl; text-align: right; }
+.join button { display: block; width: 100%; margin-top: 12px; font: inherit; font-weight: 800; font-size: 21px; color: #fff; background: var(--orange-btn); border: 0; border-radius: 12px; padding: 9px; box-shadow: 0 5px 0 var(--orange-d); cursor: pointer; }
+.join button:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--orange-d); }
+.join button:disabled { opacity: .6; }
+.join .msg { margin-top: 12px; font-weight: 700; color: var(--soft); }
+.join .msg:empty { display: none; }
+.join .msg.bad { color: #A32A12; }
+.join .msg a { color: inherit; }
+.join .fine { margin-top: 12px; font-size: 14px; color: var(--soft); }
+.join .done h3 { font-weight: 800; font-size: 23px; line-height: 1.35; color: var(--grass-d); margin-top: 8px; }
+
+.note { margin-top: 38px; background: var(--note); padding: 20px 18px 16px; transform: rotate(-1.2deg); box-shadow: 6px 7px 0 rgba(35, 72, 10, .28); position: relative; }
+.note::before { content: ""; position: absolute; top: -13px; right: 50%; transform: translateX(50%) rotate(2deg); width: 96px; height: 26px; background: rgba(242, 105, 59, .6); }
+.note h2 { font-weight: 800; font-size: 25px; line-height: 1.3; color: var(--sea-d); }
+.note .reach { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 14px; margin-top: 10px; }
+.note .num { font-size: 27px; font-weight: 800; line-height: 1.1; color: var(--ink); text-decoration: none; }
+.wa { text-decoration: none; background: var(--wa); color: #fff; font-weight: 800; font-size: 19px; padding: 7px 20px; border-radius: 12px; box-shadow: 0 4px 0 var(--wa-d); }
+.wa:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--wa-d); }
+
+.also { margin-top: 26px; font-weight: 700; color: var(--leaf); }
+.also a { text-decoration-thickness: 2px; text-underline-offset: 4px; }
+
+footer { background: var(--grass); }
+footer img { display: block; width: 100%; height: auto; }
+footer p { margin: 0; color: var(--leaf); text-align: center; font-weight: 700; font-size: 15px; padding: 4px 0 calc(14px + env(safe-area-inset-bottom, 0px)); }
+</style>
+</head>
+<body>
+<main>
+  <header class="top">
+    <img class="logo" src="../a/logo.webp" alt="دَدَن" width="1022" height="634">
+    <img class="isle" src="isle.webp" alt="جزيرة حرف الألف في لعبة دَدَن" width="1200" height="670">
+  </header>
+
+  <section class="sea">
+    <div class="col">
+      <h1>نرغّب الطفل في تعلّم العربية</h1>
+      <p class="lead">لعبة حروف وكرتون للأطفال من ٣ إلى ٧ سنوات. الإطلاق قريباً.</p>
+
+      <div class="pics">
+        <figure><img src="p-map.webp" alt="" width="640" height="360"><figcaption>جزر الحروف</figcaption></figure>
+        <figure><img src="p-garage.webp" alt="" width="640" height="360" loading="lazy"><figcaption>ورشة السيارات</figcaption></figure>
+        <figure><img src="p-rabbit.webp" alt="" width="640" height="360" loading="lazy"><figcaption>حديقة الأرنب</figcaption></figure>
+        <figure><img src="p-monster.webp" alt="" width="640" height="360" loading="lazy"><figcaption>أطعم الوحش</figcaption></figure>
+        <figure><img src="p-mole.webp" alt="" width="640" height="360" loading="lazy"><figcaption>الخُلد المشاغب</figcaption></figure>
+        <figure><img src="p-wudu.webp" alt="" width="640" height="360" loading="lazy"><figcaption>الوضوء</figcaption></figure>
+      </div>
+
+      <figure class="film">
+        <video controls playsinline preload="metadata" poster="cartoon.jpg" src="cartoon.mp4"></video>
+        <figcaption>من كرتون دَدَن «لعلّه خير».</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="lawn">
+    <div class="col">
+      <div class="join" id="join">
+        <h2>خصم عند الإطلاق</h2>
+        <p>انضمّوا إلى مجتمع دَدَن: تجرّبون التحديثات قبل نزولها.</p>
+
+        <form id="jf" novalidate>
+          <fieldset>
+            <legend class="sr">صفتكم</legend>
+            <div class="chips">
+              <label><input type="radio" name="role" value="parent"><span>ولي أمر</span></label>
+              <label><input type="radio" name="role" value="teacher"><span>معلّم/ة</span></label>
+              <label><input type="radio" name="role" value="school"><span>مدرسة أو روضة</span></label>
+              <label><input type="radio" name="role" value="ministry"><span>وزارة أو جهة</span></label>
+              <label><input type="radio" name="role" value="other"><span>غير ذلك</span></label>
+            </div>
+          </fieldset>
+          <div class="fields">
+            <input class="wide" type="text" name="org" maxlength="120" autocomplete="organization" placeholder="اسم المدرسة أو الجهة" aria-label="اسم المدرسة أو الجهة" hidden>
+            <input class="wide" type="text" name="idea" maxlength="300" placeholder="فكرة تتمنّونها في دَدَن (اختياري)" aria-label="فكرة تتمنّونها في دَدَن، اختياري">
+            <input type="text" name="name" maxlength="80" autocomplete="name" placeholder="الاسم" aria-label="الاسم">
+            <input type="tel" name="phone" inputmode="tel" autocomplete="tel" dir="ltr" placeholder="رقم الواتساب" aria-label="رقم الواتساب">
+          </div>
+          <button type="submit">أنضمّ إلى المجتمع</button>
+          <p class="msg" id="jmsg" role="status" aria-live="polite"></p>
+          <p class="fine">نستخدم الاسم والرقم لنتواصل معكم حول دَدَن فقط.</p>
+        </form>
+      </div>
+
+      <div class="note">
+        <h2>نحن فريق دَدَن</h2>
+        <p>للمدارس والجهات: تواصلوا معي، أنا شيخة الأنصاري، المؤسِّسة.</p>
+        <div class="reach">
+          <a class="num" dir="ltr" href="tel:+97466737375">+974 6673 7375</a>
+          <a class="wa" href="https://wa.me/97466737375?text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D8%B9%D9%84%D9%8A%D9%83%D9%85%D8%8C%20%D8%AA%D8%B9%D8%B1%D9%91%D9%81%D8%AA%20%D8%B9%D9%84%D9%89%20%D8%AF%D9%8E%D8%AF%D9%8E%D9%86%20%D9%81%D9%8A%20%D8%A7%D9%84%D9%85%D9%84%D8%AA%D9%82%D9%89" target="_blank" rel="noopener">واتساب</a>
+        </div>
+      </div>
+
+      <p class="also">إنستقرام: <a dir="ltr" href="https://www.instagram.com/dadaan_kids" target="_blank" rel="noopener">@dadaan_kids</a></p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <img src="../a/beds.webp" alt="" width="1650" height="152">
+  <p>الدوحة، قطر</p>
+</footer>
+
+<script>
+/* The survey. An answer goes to the Dadan database through one function that only takes it in: the page cannot read
+   anything back. The key below is the public one, the same the main site uses for "tell me at launch". */
+(function () {
+  var API = 'https://wonjydmwlaqpzanczizj.supabase.co/rest/v1/rpc/', KEY = 'sb_publishable_oVp-E7FX9CFzAdwWJbmz-Q_wqzaeN-T';
+  var form = document.getElementById('jf'), msg = document.getElementById('jmsg');
+  if (!form || !window.fetch) return;
+  var el = form.elements, WA = 'https://wa.me/97466737375', EXAMPLE = '⁦5555 5555⁩';
+  var WITH_ORG = { teacher: 1, school: 1, ministry: 1 };
+
+  function rpc(fn, body) {
+    return fetch(API + fn, { method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); });
+  }
+  function say(text, bad) { msg.textContent = text; msg.className = 'msg' + (bad ? ' bad' : ''); }
+
+  /* Digits typed in either numeral set; a Qatari number typed without the country code gets it added. */
+  function phoneOf(raw) {
+    var d = String(raw).replace(/[٠-٩]/g, function (c) { return c.charCodeAt(0) - 0x0660; })
+                       .replace(/[۰-۹]/g, function (c) { return c.charCodeAt(0) - 0x06F0; })
+                       .replace(/\D/g, '');
+    if (d.indexOf('00') === 0) d = d.slice(2);
+    if (d.length === 8) d = '974' + d;
+    return d.length >= 10 && d.length <= 15 ? '+' + d : '';
+  }
+
+  /* the school or organisation is asked only of those who have one */
+  form.addEventListener('change', function () { el.org.hidden = !WITH_ORG[el.role.value]; });
+
+  form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var role = el.role.value, name = el.name.value.trim(), phone = phoneOf(el.phone.value), btn = form.querySelector('button');
+    if (!role) { say('اختاروا صفتكم من الخيارات.', true); form.querySelector('input[name="role"]').focus(); return; }
+    if (!name) { say('اكتبوا الاسم.', true); el.name.focus(); return; }
+    if (!phone) { say('اكتبوا رقم الواتساب كاملاً، مثل ' + EXAMPLE + '.', true); el.phone.focus(); return; }
+    btn.disabled = true; say('لحظة...');
+    rpc('community_join', { p_name: name, p_phone: phone, p_role: role, p_org: WITH_ORG[role] ? el.org.value.trim() : '', p_idea: el.idea.value.trim(), p_source: 'multaqa' })
+      .catch(function () { return rpc('signup', { p_name: name, p_phone: phone, p_source: 'multaqa:' + role }); })   /* at least the name and number */
+      .then(function (res) {
+        btn.disabled = false;
+        if (res === 'ok') {
+          var done = document.createElement('div'), h = document.createElement('h3'), p = document.createElement('p');
+          done.className = 'done'; done.setAttribute('role', 'status');
+          h.textContent = 'تم، أهلاً بكم في مجتمع دَدَن';
+          p.textContent = 'سنراسلكم على واتساب بخصمكم عند الإطلاق.';
+          done.appendChild(h); done.appendChild(p); form.replaceWith(done);
+        }
+        else if (res === 'bad_phone') { say('الرقم غير واضح. اكتبوه كاملاً، مثل ' + EXAMPLE + '.', true); el.phone.focus(); }
+        else if (res === 'bad_name') { say('اكتبوا الاسم.', true); el.name.focus(); }
+        else throw new Error(res);
+      })
+      .catch(function () {
+        btn.disabled = false; say('', true);
+        var a = document.createElement('a'); a.href = WA; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'راسلونا على واتساب';
+        msg.appendChild(document.createTextNode('لم نستطع التسجيل الآن. جرّبوا بعد دقيقة، أو ')); msg.appendChild(a); msg.appendChild(document.createTextNode('.'));
+      });
+  });
+})();
+</script>
+</body>
+</html>
